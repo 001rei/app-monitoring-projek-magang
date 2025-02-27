@@ -74,4 +74,43 @@ export const auth = {
         if (error) throw { message: error.message, status: error.status};
     },
 
+    resetPasswordRequest: async ( email: string ) => {
+        const { data: user, error: userError } = await supabase
+            .from('users')
+            .select('id, provider')
+            .eq('email', email)
+            .single();
+
+        if (userError && userError.code !== 'PGRST116') {
+            throw userError;
+        }
+
+        if (!user || user.provider !== 'email') {
+            return {
+                success: true,
+                message: 'If an account exists, a password reset link will be sent.'
+            };
+        }
+
+        const resetLink = `${location.origin}/auth/reset-password`;
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: resetLink,
+        });
+
+        if (error) throw error;
+
+        return {
+            success: true,
+            message: 'If an account exists, a password reset link will be sent.'
+        };
+    },
+
+    resetPassword: async (newPassword: string) => {
+        const { data, error } = await supabase.auth.updateUser({
+            password: newPassword,
+        });
+        if (error) throw {message: error.message, status: error.status};
+        return data;
+    },
+
 }

@@ -1,7 +1,6 @@
 import { IUser } from "@/types";
 import { createClient } from "./supabase/client"
 import { User } from "@supabase/supabase-js";
-import { use } from "react";
 
 const supabase = createClient();
 
@@ -49,7 +48,13 @@ export const users = {
     },
 
     async updateUser(id: string, updates: Partial<IUser>) {
-
+        const { data, error } = await supabase
+            .from('users')
+            .update(updates)
+            .eq('id', id)
+            .select().single();
+        if (error) throw error;
+        return data as IUser;
     },
 
     async updateProfile(
