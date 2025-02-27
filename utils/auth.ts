@@ -1,0 +1,65 @@
+import { createClient } from "./supabase/client"
+import { users } from "./users";
+
+const supabase = createClient();
+
+export const auth = {
+    async signUp(email: string, password: string) {
+        const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (existingUser) {
+            throw new Error(
+                'This email is already registered. Try signing in instead.'
+            );
+        }
+
+        if (checkError && checkError.code !== 'PGRST116') {
+            // PGRST116 (no rows returned)
+            throw checkError;
+        }
+
+        const { data, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                emailRedirectTo: `${location.origin}/auth/callback`,
+            },
+        });
+
+        if (signUpError) {
+            throw signUpError;
+        }
+
+        if (!data.user) {
+            throw new Error('Failed to create user account');
+        }
+
+
+        try {
+            await users.captureUserDetails(data.user);
+        } catch (profileError) {
+            await supabase.auth.admin.deleteUser(data.user.id);
+            throw profileError;
+        }
+
+
+        return data;
+    },
+
+    login: async () => {
+
+    },
+
+    signInWithOAuth: async () => {
+
+    },
+
+    logout: async () => {
+
+    }
+
+}
