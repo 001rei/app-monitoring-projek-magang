@@ -1,18 +1,35 @@
+'use client';
+
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { User as UserProfile, FolderKanban, FolderPlus, LogOut, CircleUser } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import Image from "next/image";
+import { auth } from "@/utils/auth";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
     user: User
 }
 
 export default function UserMenu({ user } : Props) {
+    const router = useRouter();
+    const { toast } = useToast();
 
     const handleSignOut = async () => {
-        console.log("sign out");
+        try {
+            await auth.logout();
+            router.push('/login');
+            router.refresh();
+        } catch (error) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to sign out, please try again'
+            })
+        }
     }
  
     return (
