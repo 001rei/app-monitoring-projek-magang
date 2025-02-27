@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { User, FolderKanban, FolderPlus, LogOut, CircleUser } from "lucide-react";
+import { User as UserProfile, FolderKanban, FolderPlus, LogOut, CircleUser } from "lucide-react";
+import { User } from "@supabase/supabase-js";
+import Image from "next/image";
 
-export default function UserMenu() {
+interface Props {
+    user: User
+}
+
+export default function UserMenu({ user } : Props) {
 
     const handleSignOut = async () => {
         console.log("sign out");
@@ -12,21 +18,31 @@ export default function UserMenu() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="rounded-xl">
-                    <CircleUser size={28} />
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full border bg-background">
+                    {user.user_metadata.avatar_url ? (
+                        <Image 
+                            src={user.user_metadata.avatar_url}
+                            alt={user.email || ''}
+                            fill
+                            className="rounded-full object-cover"
+                            referrerPolicy="no-referrer"
+                        />
+                    ) : (
+                        <CircleUser size = { 28 } />
+                    )}
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">Wildan Arya</p>
-                        <p className="text-xs text-muted-foreground leading-none"> wildanarya707@gmail.com</p>
+                    <div className="flex flex-col space-y-2">
+                        <p className="text-sm font-medium leading-none">{ user.user_metadata.full_name || user.email }</p>
+                        <p className="text-xs text-muted-foreground leading-none">{ user.email }</p>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                     <Link href="/profile" className="w-full cursor-pointer">
-                        <User className="mr-2 h-4 w-2" />
+                        <UserProfile className="mr-2 h-4 w-2" />
                         <span>Profile</span>
                     </Link>
                 </DropdownMenuItem>
