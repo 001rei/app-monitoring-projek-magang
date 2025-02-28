@@ -1,4 +1,3 @@
-// user interface
 export interface IUser {
     id: string,
     email: string,
@@ -9,3 +8,5 @@ export interface IUser {
     updated_at: Date;
     provider: 'google' | 'github' | 'email',
 }
+
+type userProvider = "email" | "github" | "google";
