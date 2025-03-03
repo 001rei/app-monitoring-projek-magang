@@ -22,7 +22,7 @@ const profileFormSchema = z.object({
         .string({
             required_error: 'Name must be provided.',
         })
-        .max(25, {
+        .max(30, {
             message: ''
         }),
     email: z
@@ -30,7 +30,7 @@ const profileFormSchema = z.object({
             required_error: 'Email must be provided'
         })
         .email(),
-    description: z.string().max(160).optional(),
+    description: z.string().max(300).optional(),
 });
 
 type profileFormTypes = z.infer<typeof profileFormSchema>;
@@ -146,7 +146,7 @@ export default function ProfileForm({ data }: ProfileFormProps) {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className={cn(primaryButton)} disabled={isLoading}>
+                    <Button type="submit" className='bg-blue-500 text-white hover:bg-blue-600' disabled={isLoading}>
                         {isLoading && (<Loader2 className="mr-2 h-2 w-4 animate-spin" />)}
                         {isLoading ? ('Updating...') : ('Update Profile')}
                     </Button>
