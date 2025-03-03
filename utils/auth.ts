@@ -1,3 +1,4 @@
+import { error } from "console";
 import { createClient } from "./supabase/client"
 import { users } from "./users";
 
@@ -65,8 +66,15 @@ export const auth = {
         return data;
     },
 
-    signInWithOAuth: async () => {
-
+    signInWithOAuth: async (provider: 'github' | 'google',  nextUrl?: string) => {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+                redirectTo: `${location.origin}/auth/callback?next=${nextUrl || '/'}`
+            },
+        });
+        if (error) throw error;
+        return data;
     },
 
     logout: async () => {

@@ -1,15 +1,54 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { Icons } from "./icons"
 import { Button } from "./ui/button"
+import { auth } from "@/utils/auth";
+import { useSearchParams } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
+import { getAuthError } from "@/utils/auth-errors";
 
-function OAuthButtons() {
+interface OAuthButtonsProps {
+    redirectUrl?: string;
+}
+
+function OAuthButtons({ redirectUrl }: OAuthButtonsProps) {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const searchParams = useSearchParams();
+    const nextUrl = redirectUrl || searchParams.get('next') || '/projects';
+
+    const handleOAuthSignIn = async (provider: 'github' | 'google') => {
+        try {
+            setIsLoading(true);
+            await auth.signInWithOAuth(provider, nextUrl);
+        } catch (error) {
+            const { message } = getAuthError(error);
+            toast({
+                variant: 'destructive',
+                title: 'Authentication Error',
+                description: message,
+            })
+        } finally { 
+            setIsLoading(false);
+        }
+    }
+
     return (
         <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" type="button">
+            <Button 
+                onClick={() => handleOAuthSignIn('github')} 
+                variant="outline" 
+                type="button" 
+                disabled={isLoading}
+            >
                 <Icons.gitHub className="h-4 w-2" />
                 Github
             </Button>
-            <Button variant="outline" type="button">
+            <Button 
+                onClick={() => handleOAuthSignIn('google')} 
+                variant="outline" 
+                type="button" 
+                disabled={isLoading}
+            >
                 <Icons.google className="h-4 w-2" />
                 Google
             </Button>
