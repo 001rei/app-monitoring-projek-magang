@@ -1,0 +1,99 @@
+'use client';
+
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IProjects } from "@/types"
+import { TabsContent } from "@radix-ui/react-tabs";
+import { PanelsTopLeft, SquareKanban } from "lucide-react";
+import SearchAndButton from "../Search";
+import { ProjectList } from "../ProjectList";
+
+interface ProjectTabsProps {
+    activeProjects: IProjects[];
+    closedProjects: IProjects[];
+    allProjects: IProjects[];
+    searchTerm: string;
+    setSearchTerm?: (term: string) => void;
+    sortOrder: 'newest' | 'oldest';
+    onSort?: (order: 'newest' | 'oldest') => void;
+    setProjectToClose?: (id: string) => void;
+    setProjectToReopen?: (id: string) => void;
+    setProjectToDelete?: (project: IProjects) => void;
+}
+
+export default function ProjectTabs({ 
+    activeProjects,
+    closedProjects,
+    allProjects,
+    searchTerm,
+    setSearchTerm,
+    sortOrder,
+    onSort,
+    setProjectToClose,
+    setProjectToReopen,
+    setProjectToDelete,
+}: ProjectTabsProps) {
+    return (
+        <Tabs defaultValue="active-projects">
+            <TabsList className="bg-slate-100 dark:bg-slate-900 rounded-none">
+                <TabsTrigger value="active-projects">
+                    <PanelsTopLeft className="w-4 h-4 mr-2" />
+                    <span>Active Projects</span>
+                </TabsTrigger>
+                <TabsTrigger value="closed-projects">
+                    <SquareKanban className="w-4 h-4 mr-2" />
+                    <span>Closed Projects</span>
+                </TabsTrigger>
+                <TabsTrigger value="all-projects">
+                    <SquareKanban className="w-4 h-4 mr-2" />
+                    <span>All Projects</span>
+                </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="active-projects">
+                <SearchAndButton
+                    placeholderText="Search active projects"
+                    onSearch={setSearchTerm}
+                />
+                <ProjectList
+                    tab="active"
+                    projects={activeProjects}
+                    sortOrder={sortOrder}
+                    onSort={onSort}
+                    setProjectToClose={setProjectToClose}
+                    setProjectToReopen={setProjectToReopen}
+                    setProjectToDelete={setProjectToDelete}
+                />
+            </TabsContent>
+            <TabsContent value="closed-projects">
+                <SearchAndButton
+                    placeholderText="Search closed projects"
+                    onSearch={setSearchTerm}
+                />
+                <ProjectList
+                    tab="closed"
+                    projects={closedProjects}
+                    sortOrder={sortOrder}
+                    onSort={onSort}
+                    setProjectToClose={setProjectToClose}
+                    setProjectToReopen={setProjectToReopen}
+                    setProjectToDelete={setProjectToDelete}
+                />
+            </TabsContent>
+            <TabsContent value="all-projects">
+                <SearchAndButton
+                    placeholderText="Search all projects"
+                    onSearch={setSearchTerm}
+                />
+                <ProjectList
+                    tab="all"
+                    projects={allProjects}
+                    sortOrder={sortOrder}
+                    onSort={onSort}
+                    setProjectToClose={setProjectToClose}
+                    setProjectToReopen={setProjectToReopen}
+                    setProjectToDelete={setProjectToDelete}
+                />
+            </TabsContent>
+        </Tabs>
+    );
+}

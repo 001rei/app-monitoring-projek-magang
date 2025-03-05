@@ -44,7 +44,7 @@ export default function Header({ className }: HeaderProps) {
     >
       <div className="container flex h-16 items-center justify-between">
         <div className="ps-5">
-          <Link href={'/'} className={`${inter.className} text-xl font-bold`}>Orchestra.</Link>
+          <Link href={user ? '/projects' : '/'} className={`${inter.className} flex items-center space-x-2 font-bold text-xl hover:text-primary transition-colors`}>Orchestra.</Link>
         </div>
         <div className="flex items-center gap-4">
           {user ? (

@@ -1,3 +1,5 @@
+type userProvider = "email" | "github" | "google";
+
 export interface IUser {
     id: string,
     email: string,
@@ -9,4 +11,15 @@ export interface IUser {
     provider: 'google' | 'github' | 'email',
 }
 
-type userProvider = "email" | "github" | "google";
+export interface IProjects {
+    id: string;
+    name: string;
+    description: string;
+    readme: string;
+    created_by: string;
+    created_at: Date;
+    updated_at: Date;
+    closed: boolean;
+}
+
+
