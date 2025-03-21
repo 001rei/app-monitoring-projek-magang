@@ -1,30 +1,29 @@
 'use client';
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IProjects } from "@/types"
+import { IProject } from "@/types"
 import { TabsContent } from "@radix-ui/react-tabs";
 import { PanelsTopLeft, SquareKanban } from "lucide-react";
 import SearchAndButton from "../Search";
 import { ProjectList } from "../ProjectList";
 
 interface ProjectTabsProps {
-    activeProjects: IProjects[];
-    closedProjects: IProjects[];
-    allProjects: IProjects[];
+    activeProjects: IProject[];
+    closedProjects: IProject[];
+    allProjects: IProject[];
     searchTerm: string;
     setSearchTerm?: (term: string) => void;
     sortOrder: 'newest' | 'oldest';
     onSort?: (order: 'newest' | 'oldest') => void;
     setProjectToClose?: (id: string) => void;
     setProjectToReopen?: (id: string) => void;
-    setProjectToDelete?: (project: IProjects) => void;
+    setProjectToDelete?: (project: IProject) => void;
 }
 
 export default function ProjectTabs({ 
     activeProjects,
     closedProjects,
     allProjects,
-    searchTerm,
     setSearchTerm,
     sortOrder,
     onSort,

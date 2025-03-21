@@ -61,23 +61,71 @@ export interface IPriority {
     created_at: Date;
 }
 
-export interface ITask {
+interface ITask {
     id: string;
     project_id: string;
-    parent_task_id: string;
     phase_id: string;
     phase_label: string;
+    parent_task_id: string | null; // ➜ Menentukan apakah ini subtask atau task utama
+
+    status: string | null;
+    priority: string | null;
     title: string;
     description: string;
-    priority: string | null;
-    status: string | null;
     startDate: Date | null;
     endDate: Date | null;
     created_at: Date;
     updated_at: Date;
     created_by: string;
+
     assignees?: string[];
+    subtasks?: ITask[];
 }
+
+interface IComment {
+    id: string;
+    content: string;
+    user_id: string;
+    task_id: string;
+    created_at: Date;
+    updated_at: Date;
+}
+
+interface CommentResponse extends Omit<IComment, 'user_id'> {
+    user: Partial<IUser>;
+}
+
+type ActivityType = 'labels' | 'date' | 'user' | 'users';
+type ActivityPayload = 'id' | 'value' | 'ids';
+
+type ActivityObject =
+    | { type: 'date'; value: string }
+    | { type: 'user'; id: string }
+    | { type: 'users'; ids: string[] };
+
+type TaskActivity = (string | ActivityObject)[];
+
+interface IActivity {
+    id: string;
+    created_at: Date;
+    content: TaskActivity;
+    user_id: string;
+    task_id: string;
+    updated_at: Date;
+}
+
+interface ActivityResponse extends Omit<IActivity, 'user_id'> {
+    user: Partial<IUser>;
+}
+
+type TimelineType = 'activity' | 'comment';
+interface ITimeline {
+    id: string;
+    created_at: Date;
+    type: TimelineType;
+    value: ActivityResponse | CommentResponse;
+}
+
 
 
 // ------------------------------
@@ -93,6 +141,8 @@ interface ICustomFieldTask {
     title: string;
     phase_label: string;
     description?: string;
+    status: string;
+    priority: string;
 }
 
 type ProjectWithOptions = {
@@ -104,3 +154,38 @@ type ProjectWithOptions = {
     priorities?: Omit<IPriority, 'created_at' | 'updated_at'>[];
     tasks?: Omit<ITask, 'created_at' | 'updated_at'>[];
 };
+
+interface ITaskWithOptions extends Partial<ITask> {
+    creator?: {
+        id: string;
+        name: string;
+        avatar: string;
+        description: string;
+    };
+    status?: {
+        id: string;
+        label: string;
+        color: string;
+        order: number;
+        description?: string;
+    };
+    priority?: {
+        id: string;
+        label: string;
+        color: string;
+        order: number;
+        description?: string;
+    };
+    subtasks?: ITaskWithOptions[];
+    assignees?: {
+        id: string;
+        name: string;
+        description: string;
+        avatar: string;
+        links: IUserLink[];
+    }[];
+}
+
+interface MemberWithUser extends IProjectMember {
+    user: Pick<IUser, 'id' | 'name' | 'email' | 'avatar'>;
+}

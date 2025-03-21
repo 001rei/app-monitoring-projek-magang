@@ -1,6 +1,6 @@
 'use client';
 
-import { IProjects } from "@/types";
+import { IProject } from "@/types";
 import ProjectTabs from "./components/ProjectTabs";
 import { CloseProjectDialog } from "./components/CloseProjectDialog";
 import { DeleteProjectDialog } from "./components/DeleteProjectDialog";
@@ -10,7 +10,7 @@ import { projects } from "@/utils/projects";
 import { toast } from "@/hooks/use-toast";
 
 interface ProjectsProps {
-    initialProjects: IProjects[];
+    initialProjects: IProject[];
 }
 
 export default function Projects({ initialProjects }: ProjectsProps) {
@@ -19,7 +19,7 @@ export default function Projects({ initialProjects }: ProjectsProps) {
     const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
     const [projectToClose, setProjectToClose] = useState<string | null>(null);
     const [projectToReOpen, setProjectToReOpen] = useState<string | null>(null);
-    const [projectToDelete, setProjectToDelete] = useState<IProjects | null>(null);
+    const [projectToDelete, setProjectToDelete] = useState<IProject | null>(null);
 
     const filteredProjects = useMemo(() => {
         return availableProjects

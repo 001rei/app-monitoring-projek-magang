@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
-import { defaultPhases, defaultPriorities, defaultStatuses, defaultTasks } from '../../consts/default-options';
+import { defaultPhases, defaultTasks } from '../../consts/default-options';
 import { createClient } from '@/utils/supabase/client';
 import { projects } from '@/utils/projects';
 import { ProjectWithOptions } from '@/types';
@@ -21,8 +21,6 @@ export default function NewProjectForm() {
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('internal');
     const [phases, setPhases] = useState(defaultPhases);
-    const [statuses, setStatuses] = useState(defaultStatuses);
-    const [priorities, setPriorities] = useState(defaultPriorities);
     const [tasks, setTasks] = useState(defaultTasks);
 
     const handleCreateProject = async () => {
@@ -38,8 +36,6 @@ export default function NewProjectForm() {
                 description,
                 phases,
                 category,
-                statuses,
-                priorities,
                 tasks
             };
 
@@ -53,7 +49,7 @@ export default function NewProjectForm() {
                 description: 'Project created successfully'
             });
 
-            // router.push(`/projects/${project.id}`);
+            router.push(`/projects/${project.id}`);
         } catch (error) {
             console.error('Error creating project:', error);
             toast({

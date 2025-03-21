@@ -60,7 +60,7 @@ export const DeleteProjectDialog = ({
                         onClick={onConfirm}
                         disabled={confirmName !== projectName}
                     >
-                        Delete Project
+                        {confirmName !== projectName ? 'Delete Project' : 'Deleting...'}
                     </Button>
                 </DialogFooter>
             </DialogContent>
