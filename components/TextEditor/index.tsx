@@ -13,7 +13,7 @@ import { EditorContent, mergeAttributes, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useEffect } from 'react';
 import { IUser } from '@/types';
-import ToolBar from './Toolbar/ToolBar';
+import ToolBar from './Toolbar/Toolbar';
 import getSuggestion from './Toolbar/Mention/suggestions';
 
 interface Props {
