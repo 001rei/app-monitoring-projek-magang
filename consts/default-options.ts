@@ -4,27 +4,34 @@ import { v4 as uid } from 'uuid';
 export const defaultPhases: ICustomFieldData[] = [
     {
         id: uid(),
-        label: 'Perencanaan'
+        label: 'Perencanaan',
+        order: 0,
+        status: 1,
     },
     {
         id: uid(),
-        label: 'Pendefinisian'
+        label: 'Pendefinisian',
+        order: 1,
     },
     {
         id: uid(),
-        label: 'Pengembangan'
+        label: 'Pengembangan',
+        order: 2
     },
     {
         id: uid(),
-        label: 'Testing Plan'
+        label: 'Testing Plan',
+        order: 3
     },
     {
         id: uid(),
-        label: 'Implementasi'
+        label: 'Implementasi',
+        order: 4
     },
     {
         id: uid(),
-        label: 'PIR'
+        label: 'PIR',
+        order: 5
     },
 ];  
 

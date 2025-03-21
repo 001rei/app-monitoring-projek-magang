@@ -83,6 +83,5 @@ export default function UserMenu({ user } : Props) {
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-
     );
 }

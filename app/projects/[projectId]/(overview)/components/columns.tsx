@@ -181,7 +181,7 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
         },
         cell: ({ row }) => {
             const priority = row.original.priority;
-
+            
             return priority ? (
                 <div className="pl-3">
                     <CustomFieldTagRenderer

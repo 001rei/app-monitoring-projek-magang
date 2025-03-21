@@ -14,12 +14,12 @@ export const tasks = {
                     `
                     id,
                     title,
-                    phase_id,
+                    phase_id ( * ),
                     parent_task_id,
                     phase_label,
                     creator:created_by (id,name,avatar),
-                    priority ( id, label, color, order),
-                    status ( id, label, color, order),
+                    priority ( id, label, color, "order"),
+                    status ( id, label, color, "order"),
                     startDate,
                     endDate,
                     task_assignees (

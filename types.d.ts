@@ -131,6 +131,8 @@ interface ITimeline {
 // ------------------------------
 interface ICustomFieldData {
     id: string;
+    order?: number;
+    status?: number;
     label?: string;
     color?: string;
     description?: string;
@@ -184,6 +186,15 @@ interface ITaskWithOptions extends Partial<ITask> {
         avatar: string;
         links: IUserLink[];
     }[];
+    phase_id?: {
+        id: string;
+        label: string;
+        startDate: Date;
+        endDate: Date;
+        actualEndDate: Date;
+        status: number;
+        phase_order: number;
+    };
 }
 
 interface MemberWithUser extends IProjectMember {
