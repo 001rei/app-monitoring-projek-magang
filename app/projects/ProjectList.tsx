@@ -1,18 +1,18 @@
 'use client';
 
-import { IProjects } from '@/types';
+import { IProject } from '@/types';
 import { EmptyProjectList } from './components/EmptyProjectList';
 import { ProjectItem } from './components/ProjectItem';
 import { ProjectListHeader } from './components/ProjectListHeader';
 
 interface ProjectListProps {
     tab: 'active' | 'all' | 'closed';
-    projects: IProjects[];
+    projects: IProject[];
     sortOrder: 'newest' | 'oldest';
     onSort?: (order: 'newest' | 'oldest') => void;
     setProjectToClose?: (id: string) => void;
     setProjectToReopen?: (id: string) => void;
-    setProjectToDelete?: (project: IProjects) => void;
+    setProjectToDelete?: (project: IProject) => void;
 }
 
 export const ProjectList = ({

@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import HeadingMenu from './HeadingMenu';
 import { AlignMenu } from './AlignMenu';
 
-export default function Toolabar({ editor }: { editor: Editor | null }) {
+export default function ToolBar({ editor }: { editor: Editor | null }) {
     if (!editor) return null;
 
     const handleBold = () => {

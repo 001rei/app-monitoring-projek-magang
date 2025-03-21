@@ -2,15 +2,15 @@
 
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { IProjects } from '@/types';
+import { IProject } from '@/types';
 import { ProjectActions } from './ProjectActions';
 
 interface ProjectItemProps {
-    project: IProjects;
+    project: IProject;
     tab: 'active' | 'all' | 'closed';
     setProjectToClose?: (id: string) => void;
     setProjectToReopen?: (id: string) => void;
-    setProjectToDelete?: (project: IProjects) => void;
+    setProjectToDelete?: (project: IProject) => void;
 }
 
 export const ProjectItem = ({
