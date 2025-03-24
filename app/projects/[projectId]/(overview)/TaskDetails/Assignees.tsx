@@ -230,7 +230,7 @@ export const Assignees = () => {
                             >
                                 <Checkbox
                                     checked={isAssigned(member.id || '')}
-                                    className="w-4 h-4 mr-4 rounded-sm bg-gray-200 dark:bg-black border border-gray-300 dark:border-gray-900"
+                                    className="w-4 h-4 mr-4 rounded-sm "
                                 />
                                 <Avatar className="w-4 h-4 mr-2">
                                     <AvatarImage src={member.avatar} />

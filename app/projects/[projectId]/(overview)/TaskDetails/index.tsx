@@ -90,10 +90,12 @@ const MemoizedTimelineItem = React.memo(
         item,
         allMembers,
         statuses,
+        priorities,
     }: {
         item: any;
         allMembers: any[];
         statuses: any[];
+        priorities: any[];
     }) => {
         if (item.type === 'activity') {
             return (
@@ -101,6 +103,7 @@ const MemoizedTimelineItem = React.memo(
                     activity={item.value as ActivityResponse}
                     allMembers={allMembers}
                     statuses={statuses}
+                    priorities={priorities}
                 />
             );
         }
@@ -119,7 +122,7 @@ export const TaskDetails = () => {
     const { taskActivities } = useActivityQueries(selectedTask?.id as string);
     const params = useParams();
     const projectId = params.projectId as string;
-    const { statuses, members } = useProjectQueries(projectId);
+    const { priorities, statuses, members } = useProjectQueries(projectId);
     const { user } = useCurrentUser();
     const { taskComments } = useCommentQueries(selectedTask?.id as string);
 
@@ -147,6 +150,7 @@ export const TaskDetails = () => {
                             item={item}
                             allMembers={allMembers || []}
                             statuses={statuses || []}
+                            priorities={priorities || []}
                         />
                     ))}
                 </div>

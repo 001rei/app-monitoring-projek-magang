@@ -15,10 +15,13 @@ import { DatePicker } from './DatePicker';
 import { CustomFieldTagRenderer } from '@/components/CustomFieldTagRenderer';
 import { useTaskDetails } from '../TaskDetailsContext';
 import { toast } from '@/hooks/use-toast';
+import { TaskActivity } from '@/types';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useActivityQueries } from '@/hooks/useActivityQueries';
 
 export const Project = () => {
     const params = useParams();
-    const { selectedTask, updateTaskPriority, updateTaskStatus } =
+    const { selectedTask, updateTaskPriority, updateTaskStatus, updateTaskDates } =
         useTaskDetails();
     const { statuses, priorities } = useProjectQueries(
         params.projectId as string
@@ -26,17 +29,75 @@ export const Project = () => {
     const { task, updatePriority, updateStatus, updateDates } = useTaskQueries(
         selectedTask?.id || ''
     );
+    const { user } = useCurrentUser();
+    const { createActivities } = useActivityQueries(selectedTask?.id || '');
 
     const handlePrioritySelect = async (priorityId: string | null) => {
         if (!selectedTask?.id) return;
 
-        const priority = priorityId
+        const newPriority = priorityId
             ? priorities?.find((p) => p.id === priorityId) || null
             : null;
 
+        const oldPriority = priorities?.find((p) => p.id === selectedTask?.priority?.id);
+
+        if (oldPriority?.id === newPriority?.id) {
+            return;
+        }
+
         try {
             await updatePriority(priorityId || null);
-            updateTaskPriority?.(selectedTask.id, priority);
+            updateTaskPriority?.(selectedTask.id, newPriority);
+
+            const activities: {
+                task_id: string;
+                user_id: string;
+                content: TaskActivity;
+            }[] = [];
+
+            if (oldPriority && newPriority) {
+                activities.push({
+                    task_id: selectedTask.id,
+                    user_id: user?.id as string,
+                    content: [
+                        { type: 'user', id: user?.id as string },
+                        'changed task priority from',
+                        { type: 'priority', id: oldPriority.id },
+                        'to',
+                        { type: 'priority', id: newPriority.id },
+                        'on',
+                        { type: 'date', value: new Date().toISOString() },
+                    ],
+                });
+            } else if (oldPriority && !newPriority) {
+                activities.push({
+                    task_id: selectedTask.id,
+                    user_id: user?.id as string,
+                    content: [
+                        { type: 'user', id: user?.id as string },
+                        'removed task priority',
+                        { type: 'priority', id: oldPriority.id },
+                        'on',
+                        { type: 'date', value: new Date().toISOString() },
+                    ],
+                });
+            } else if (!oldPriority && newPriority) {
+                activities.push({
+                    task_id: selectedTask.id,
+                    user_id: user?.id as string,
+                    content: [
+                        { type: 'user', id: user?.id as string },
+                        'set task priority to',
+                        { type: 'priority', id: newPriority.id },
+                        'on',
+                        { type: 'date', value: new Date().toISOString() },
+                    ],
+                });
+            }
+
+            if (activities.length > 0) {
+                await createActivities(activities);
+            }
         } catch (error) {
             toast({
                 title: 'Failed to update priority',
@@ -45,26 +106,81 @@ export const Project = () => {
         }
     };
 
-    const handleStatusSelect = async (priorityId: string | null) => {
+    const handleStatusSelect = async (statusId: string | null) => {
         if (!selectedTask?.id) return;
 
-        const status = priorityId
-            ? statuses?.find((p) => p.id === priorityId) || null
+        const newStatus = statusId
+            ? statuses?.find((s) => s.id === statusId) || null
             : null;
 
+        const oldStatus = statuses?.find((s) => s.id === selectedTask?.status?.id);
+
+        if (oldStatus?.id === newStatus?.id) {
+            return;
+        }
+
         try {
-            await updateStatus(priorityId || null);
-            updateTaskStatus?.(selectedTask.id, status);
-            
+            await updateStatus(statusId || null);
+            updateTaskStatus?.(selectedTask.id, newStatus);
+
+            const activities: {
+                task_id: string;
+                user_id: string;
+                content: TaskActivity;
+            }[] = [];
+
+            if (oldStatus && newStatus) {
+                activities.push({
+                    task_id: selectedTask.id,
+                    user_id: user?.id as string,
+                    content: [
+                        { type: 'user', id: user?.id as string },
+                        'changed task status from',
+                        { type: 'status', id: oldStatus.id },
+                        'to',
+                        { type: 'status', id: newStatus.id },
+                        'on',
+                        { type: 'date', value: new Date().toISOString() },
+                    ],
+                });
+            } else if (oldStatus && !newStatus) {
+                activities.push({
+                    task_id: selectedTask.id,
+                    user_id: user?.id as string,
+                    content: [
+                        { type: 'user', id: user?.id as string },
+                        'removed task status',
+                        { type: 'status', id: oldStatus.id },
+                        'on',
+                        { type: 'date', value: new Date().toISOString() },
+                    ],
+                });
+            } else if (!oldStatus && newStatus) {
+                activities.push({
+                    task_id: selectedTask.id,
+                    user_id: user?.id as string,
+                    content: [
+                        { type: 'user', id: user?.id as string },
+                        'set task status to',
+                        { type: 'status', id: newStatus.id },
+                        'on',
+                        { type: 'date', value: new Date().toISOString() },
+                    ],
+                });
+            }
+
+            if (activities.length > 0) {
+                await createActivities(activities);
+            }
         } catch (error) {
             toast({
-                title: 'Failed to update priority',
+                title: 'Failed to update status',
                 variant: 'destructive',
             });
         }
     };
 
-    const handleDateChange = (
+    const handleDateChange = async (
         type: 'startDate' | 'endDate',
         date: Date | undefined
     ) => {
@@ -80,7 +196,17 @@ export const Project = () => {
                     ? date?.toISOString() || null
                     : (task?.endDate as any) || null,
         };
-        updateDates(updates);
+
+        try {
+            await updateDates(updates);
+            updateTaskDates?.(selectedTask.id, date);
+
+        } catch (error) {
+            toast({
+                title: 'Failed to update Dates',
+                variant: 'destructive',
+            });
+        }
     };
 
     const startDate = task?.startDate ? new Date(task.startDate) : undefined;
@@ -149,18 +275,20 @@ export const Project = () => {
                             <span className="w-3 h-3 mr-2" />
                             <div className="flex-grow">None</div>
                         </DropdownMenuItem>
-                        {sortedStatuses?.map((status) => (
-                            <DropdownMenuItem
-                                key={status.id}
-                                onClick={() => handleStatusSelect(status.id)}
-                            >
-                                <span
-                                    className="w-3 h-3 mr-2 border rounded-full"
-                                    style={{ borderColor: status.color }}
-                                />
-                                <div className="flex-grow">{status.label}</div>
-                            </DropdownMenuItem>
-                        ))}
+                        {sortedStatuses
+                            ?.filter((status) => status.label !== 'Done') 
+                            .map((status) => (
+                                <DropdownMenuItem
+                                    key={status.id}
+                                    onClick={() => handleStatusSelect(status.id)}
+                                >
+                                    <span
+                                        className="w-3 h-3 mr-2 border rounded-full"
+                                        style={{ borderColor: status.color }}
+                                    />
+                                    <div className="flex-grow">{status.label}</div>
+                                </DropdownMenuItem>
+                            ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

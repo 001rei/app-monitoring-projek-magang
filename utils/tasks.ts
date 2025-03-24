@@ -35,6 +35,16 @@ export const tasks = {
                 assignees: task.task_assignees?.map((a) => a.users) || [],
             })) as any[];
         },
+
+        getProjectPhase: async (projectId: string, phaseLabel: string) => {
+            const { data, error} = await supabase
+                .from('phases')
+                .select('*')
+                .eq('project_id', projectId)
+                .eq('label', phaseLabel)
+            if (error) throw error;
+            return data;
+        }
     },
 
     details: {

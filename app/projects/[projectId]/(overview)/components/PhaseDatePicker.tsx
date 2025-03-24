@@ -101,7 +101,11 @@ export default function PhaseDatePicker({ phaseId }: Props) {
                     <CalendarIcon className="h-4 w-4" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto px-4 pb-3 flex flex-col gap-2">
+            <PopoverContent 
+                className="w-auto px-4 pb-3 flex flex-col gap-2"
+                align="end" 
+                sideOffset={5}
+            >
                 <Calendar
                     mode="range"
                     selected={dateRange}

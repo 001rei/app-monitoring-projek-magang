@@ -21,7 +21,7 @@ export const TaskDescription = () => {
     const [description, setDescription] = useState(task?.description || '');
     const [editable, setEditable] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    console.log('deskripsi: ', selectedTask);
+    
     const handleSave = async () => {
         if (!selectedTask?.id) return;
         try {

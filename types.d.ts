@@ -95,10 +95,12 @@ interface CommentResponse extends Omit<IComment, 'user_id'> {
     user: Partial<IUser>;
 }
 
-type ActivityType = 'labels' | 'date' | 'user' | 'users';
+type ActivityType = 'status' | 'priority' | 'date' | 'user' | 'users';
 type ActivityPayload = 'id' | 'value' | 'ids';
 
 type ActivityObject =
+    | { type: 'status'; id: string }
+    | { type: 'priority'; id: string }
     | { type: 'date'; value: string }
     | { type: 'user'; id: string }
     | { type: 'users'; ids: string[] };
@@ -184,7 +186,6 @@ interface ITaskWithOptions extends Partial<ITask> {
         name: string;
         description: string;
         avatar: string;
-        links: IUserLink[];
     }[];
     phase_id?: {
         id: string;

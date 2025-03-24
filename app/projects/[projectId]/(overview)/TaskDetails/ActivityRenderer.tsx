@@ -1,5 +1,6 @@
+import { CustomFieldTagRenderer } from '@/components/CustomFieldTagRenderer';
 import { UserCard } from '@/components/UserCard';
-import { ActivityResponse, IStatus, IUser } from '@/types';
+import { ActivityResponse, IPriority, IStatus, IUser } from '@/types';
 import { FC } from 'react';
 
 // Helper components for each activity type
@@ -56,16 +57,38 @@ const DateRenderer = ({ value }: { value: Date | string }) => {
     return <span>{formattedDate}</span>;
 };
 
-// Define the props and task activity types
+const StatusBadge = ({ status }: { status?: IStatus }) => {
+    if (!status) {
+        return <span>Unknown Status</span>;
+    }
+
+    return (
+        <CustomFieldTagRenderer label={status.label} color={status.color} />
+    );
+};
+
+const PriorityBadge = ({ priority }: { priority?: IPriority }) => {
+    if (!priority) {
+        return <span>Unknown Priority</span>;
+    }
+
+    return (
+        <CustomFieldTagRenderer label={priority.label} color={priority.color} />
+    );
+};
+
 interface ActivityRendererProps {
     activity: ActivityResponse;
     allMembers: Partial<IUser>[];
     statuses: IStatus[];
+    priorities: IPriority[];
 }
 
 const ActivityRenderer: FC<ActivityRendererProps> = ({
     activity,
     allMembers,
+    statuses,
+    priorities,
 }) => {
     return (
         <div className="flex items-center flex-wrap text-xs gap-1 ml-3 my-3">
@@ -95,6 +118,24 @@ const ActivityRenderer: FC<ActivityRendererProps> = ({
                                 users={item.ids
                                     .map((id) => allMembers?.find((member) => member.id === id))
                                     .filter((member): member is IUser => member !== undefined)}
+                            />
+                        );
+                    case 'status':
+                        return (
+                            <StatusBadge
+                                key={index}
+                                status={statuses?.find(
+                                    (status: IStatus) => status.id === item.id
+                                )}
+                            />
+                        );
+                    case 'priority':
+                        return (
+                            <PriorityBadge
+                                key={index}
+                                priority={priorities?.find(
+                                    (priority: IPriority) => priority.id === item.id
+                                )}
                             />
                         );
                     default:

@@ -30,7 +30,9 @@ export function AccessContainer({
     
     return (
         <>
-           
+            <div className="p-4 rounded-sm bg-muted/90 dark:bg-muted/60 text-sm border">
+                Only those with access to this project can view it.
+            </div>
             <InviteUsers 
                 projectName={projectName as string}
                 projectId={projectId}

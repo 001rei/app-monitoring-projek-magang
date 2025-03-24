@@ -18,13 +18,17 @@ import AddTaskDialog from "./AddTaskDialog"
 import PhaseDatePicker from "./PhaseDatePicker"
 import { CalendarDays } from "lucide-react"
 import { PhaseAction } from "./PhaseAction"
+import { useProjectQueries } from "@/hooks/useProjectQueries"
+import { usePhaseQueries } from "@/hooks/usePhaseQueries"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    label: string;
+    projectId: string;
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, label, projectId }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -54,18 +58,19 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         getSubRows: (row: any) => row.subtasks,
     });
 
-    const phaseLabel = table.getRowModel().rows?.length ? table.getRowModel().rows[0].original.phase_label : '';
-    const phaseId = table.getRowModel().rows?.length ? table.getRowModel().rows[0].original.phase_id.id : '';
-    const phaseOrder = table.getRowModel().rows?.length ? table.getRowModel().rows[0].original.phase_id.phase_order : '';
+    const { phase } = usePhaseQueries(projectId, label);
+
+    const phaseLabel = phase?.length ? phase[0].label : '';
+    const phaseId = phase?.length ? phase[0].id : '';
+    const phaseOrder = phase?.length ? phase[0].order : '';
+    
     const startDate = table.getRowModel().rows?.length && table.getRowModel().rows[0].original.phase_id.startDate
         ? new Date(table.getRowModel().rows[0].original.phase_id.startDate)
         : null;
-
     const endDate = table.getRowModel().rows?.length && table.getRowModel().rows[0].original.phase_id.endDate
         ? new Date(table.getRowModel().rows[0].original.phase_id.endDate)
         : null;
-    console.log(startDate);
-    console.log(endDate);
+    
     return (
         <div className="space-y-4">
             <div className="p-3 rounded-sm bg-blue-50 dark:bg-blue-900/30 text-xs border-2 border-blue-200 dark:border-blue-800 shadow-sm">

@@ -44,13 +44,6 @@ export function TaskActionsCell({ row }: { row: any }) {
                             <span>Add Subtask</span>
                         </DropdownMenuItem>
                     )}
-
-                    <Separator />
-
-                    <DropdownMenuItem className="cursor-pointer flex items-center" onSelect={() => setIsDeleteDialogOpen(true)}>
-                        <Trash className="mr-2 h-4 w-4" color="red" />
-                        <span className="text-red-500">Delete</span>
-                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 
@@ -64,8 +57,6 @@ export function TaskActionsCell({ row }: { row: any }) {
                     phaseLabel={row.original.phase_label as string}
                 />
             )}
-
-            <DeleteConfirmationDialog isOpen={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} taskId={row.original.id} />
         </>
     );
 }

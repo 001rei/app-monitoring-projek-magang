@@ -24,7 +24,8 @@ export default function OpenTaskDetails({ row }: Props) {
                     updates: Partial<ITaskWithOptions>
                 ) => {
                     try {
-                        if ('status' in updates || 'priority' in updates) {
+                        if ('status' in updates || 'priority' in updates || 'startDate' in updates ||
+                            'endDate' in updates) {
                             await reloadProjectTasks();
                         } else {
                             setTasks((prev) =>

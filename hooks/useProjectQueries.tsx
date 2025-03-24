@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projects } from '@/utils/projects';
 import { tasks } from '@/utils/tasks';
 
-export const useProjectQueries = (projectId: string, taskId?: string) => {
+export const useProjectQueries = (projectId: string, taskId?: string, phaseLabel?: string) => {
     const queryClient = useQueryClient();
 
     // Fetch project tasks

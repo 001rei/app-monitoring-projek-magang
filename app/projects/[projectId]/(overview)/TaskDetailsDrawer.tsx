@@ -43,7 +43,7 @@ export const TaskDetailsDrawer = () => {
                             variant="outline"
                             className="text-[11px] text-gray-500 dark:text-gray-600 w-fit"
                         >
-                            Project Name
+                            {selectedTask.phase_label}
                         </Badge>
                     </SheetDescription>
                 </SheetHeader>

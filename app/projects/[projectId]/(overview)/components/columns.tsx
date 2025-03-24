@@ -15,6 +15,7 @@ import { useCallback, useState } from "react"
 import { useProjectQueries } from "@/hooks/useProjectQueries"
 import { createClient } from "@/utils/supabase/client"
 import { TaskDoneConfirmationDialog } from "./TaskDoneConfirmationDialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export const columns: ColumnDef<ITaskWithOptions>[] = [
     {
@@ -74,12 +75,22 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
 
             return (
                 <>
-                    <Checkbox
-                        checked={isChecked}
-                        onCheckedChange={handleCheckboxClick}
-                        disabled={isLoading || isChecked}
-                        aria-label="Select row"
-                    />
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={handleCheckboxClick}
+                                    disabled={isLoading || isChecked}
+                                    aria-label="Select row"
+                                />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Mark this task as done</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+
                     <TaskDoneConfirmationDialog
                         isOpen={isDialogOpen}
                         onClose={handleCancel}

@@ -1,3 +1,4 @@
+import { DateUpdates } from '@/hooks/useTaskQueries';
 import { ITaskWithOptions } from '@/types';
 import { createContext, useContext, useState } from 'react';
 
@@ -11,13 +12,18 @@ interface TaskDetailsContextType {
     updateTaskDescription?: (taskId: string, description: string) => void;
     updateTaskStatus?: (
         taskId: string,
-        status: { id: string; label: string; color: string } | undefined
+        status: { id: string; label: string; color: string; 'order': number; } | undefined
     ) => void;
     updateTaskPriority?: (
         taskId: string,
         priority:
-            | { id: string; label: string; color: string; }
+            | { id: string; label: string; color: string; 'order': number; }
             | undefined
+    ) => void;
+    updateTaskDates? : (
+         taskId: string,
+         startDate?: Date | null, 
+         endDate?: Date | null,   
     ) => void;
 }
 
@@ -64,7 +70,7 @@ export function TaskDetailsProvider({
 
     const updateTaskStatus = (
         taskId: string,
-        status: { id: string; label: string; color: string } | undefined
+        status: { id: string; label: string; color: string; 'order': number;} | undefined
     ) => {
         setSelectedTask((prev) =>
             prev?.id === taskId ? { ...prev, status: status || undefined } : prev
@@ -75,13 +81,36 @@ export function TaskDetailsProvider({
     const updateTaskPriority = (
         taskId: string,
         priority:
-            | { id: string; label: string; color: string; }
+            | { id: string; label: string; color: string; 'order': number }
             | undefined
     ) => {
         setSelectedTask((prev) =>
             prev?.id === taskId ? { ...prev, priority: priority || undefined } : prev
         );
         onTaskUpdate?.(taskId, { priority });
+    };
+
+    const updateTaskDates = (
+        taskId: string,
+        startDate?: Date | null, 
+        endDate?: Date | null,  
+    ) => {
+        setSelectedTask((prev) => {
+            if (prev?.id === taskId) {
+                return {
+                    ...prev,
+                    ...(startDate !== undefined && { startDate }),
+                    ...(endDate !== undefined && { endDate }),   
+                };
+            }
+            return prev;
+        });
+
+        const dates: { startDate?: Date | null; endDate?: Date | null } = {};
+        if (startDate !== undefined) dates.startDate = startDate;
+        if (endDate !== undefined) dates.endDate = endDate;
+
+        onTaskUpdate?.(taskId, dates);
     };
 
     return (
@@ -96,6 +125,7 @@ export function TaskDetailsProvider({
                 updateTaskDescription,
                 updateTaskStatus,
                 updateTaskPriority,
+                updateTaskDates,
             }}
         >
             {children}

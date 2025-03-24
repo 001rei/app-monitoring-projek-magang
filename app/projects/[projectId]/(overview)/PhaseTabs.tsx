@@ -16,7 +16,6 @@ interface Props {
 export default function PhaseTabs({ projectId }: Props) {
     const { projectTasks, isLoading } = useProjectQueries(projectId);
 
-    // Proses data setiap kali projectTasks berubah
     const tasks = useMemo(() => {
         if (!projectTasks) return [];
 
@@ -38,7 +37,6 @@ export default function PhaseTabs({ projectId }: Props) {
         }));
     }, [projectTasks]);
 
-    // Daftar fase 
     const phases = [
         { value: "perencanaan", label: "Perencanaan", tasks: tasks.filter(task => task.phase_label === 'Perencanaan') },
         { value: "pendefinisian", label: "Pendefinisian", tasks: tasks.filter(task => task.phase_label === 'Pendefinisian') },
@@ -77,7 +75,12 @@ export default function PhaseTabs({ projectId }: Props) {
             ) : (
                 phases.map(phase => (
                     <TabsContent key={phase.value} value={phase.value}>
-                        <DataTable columns={columns} data={phase.tasks} />
+                        <DataTable 
+                            columns={columns} 
+                            data={phase.tasks} 
+                            label={phase.label}
+                            projectId={projectId}
+                        />
                     </TabsContent>
                 ))
             )}
