@@ -2,7 +2,6 @@
 
 import type { ColumnDef } from "@tanstack/react-table"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, ChevronRight, ArrowUpDown } from "lucide-react"
 import { ITaskWithOptions } from "@/types"
@@ -46,12 +45,12 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
                             .update({ status: newStatus, updated_at: new Date() })
                             .eq("parent_task_id", task.id);
 
+                        await reloadProjectTasks();
                         row.toggleSelected(!!value);
                         setIsChecked(true); 
                     } catch (error) {
                         console.error("Gagal mengubah status:", error);
                     } finally {
-                        await reloadProjectTasks();
                         setIsLoading(false);
                     }
                 },
@@ -244,7 +243,7 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
         cell: ({ row }) => {
             const task = row.original;
             const currentStatus = task.status || { id: "unknown", label: "Unknown", color: "gray" };
-            const endDate = task.endDate ? new Date(task.endDate).toLocaleDateString() : <p className="text-gray-500/75">No Due Date</p>; // Convert Date to string or show fallback
+            const endDate = task.endDate ? new Date(task.endDate).toLocaleDateString() : <p className="text-gray-500/75">No Due Date</p>; 
 
             return (
                 <div className={currentStatus.label === "Done" ? "line-through text-muted-foreground ml-5" : "ml-5"}>

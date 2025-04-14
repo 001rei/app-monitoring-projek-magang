@@ -23,7 +23,6 @@ interface DeleteConfirmationDialogProps {
 export function DeleteConfirmationDialog({
     isOpen,
     onOpenChange,
-    taskId,
     onConfirm,
 }: DeleteConfirmationDialogProps) {
     const [isDeleting, setIsDeleting] = useState(false);

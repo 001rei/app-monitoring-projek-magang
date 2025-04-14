@@ -11,7 +11,7 @@ import { useActivityQueries } from '@/hooks/useActivityQueries';
 import { useCommentQueries } from '@/hooks/useCommentQueries';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { cn } from '@/lib/utils';
-import { Ellipsis, Pen, Trash } from 'lucide-react';
+import { ChevronDown, ChevronUp, Ellipsis, Pen, Reply, Trash, User } from 'lucide-react';
 import { FC, useState } from 'react';
 import {
     AlertDialog,
@@ -28,6 +28,7 @@ import { useTaskDetails } from '../TaskDetailsContext';
 import { CommentResponse } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { secondaryButton, successButton } from '@/consts/buttonStyles';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Props {
     comment: CommentResponse;
@@ -38,12 +39,17 @@ export const Comment: FC<Props> = ({ comment }) => {
     const [editable, setEditable] = useState(false);
     const { user } = useCurrentUser();
     const { selectedTask } = useTaskDetails();
-    const { updateComment, deleteComment } = useCommentQueries(
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [replyContent, setReplyContent] = useState('');
+    const [isReplying, setIsReplying] = useState(false);
+    const { updateComment, deleteComment, createComment, reloadCommentTask } = useCommentQueries(
         selectedTask?.id || ''
     );
     const { createActivity } = useActivityQueries(selectedTask?.id || '');
 
     const isCommentOwner = user?.id === comment.user.id;
+    const replyCount = comment.replies ? comment.replies.length : 0;
+    const replies = comment.replies;
 
     const handleUpdateComment = async () => {
         if (!description.trim()) return;
@@ -63,11 +69,10 @@ export const Comment: FC<Props> = ({ comment }) => {
         }
     };
 
-    const handleDeleteComment = async () => {
+    const handleDeleteComment = async (id: string) => {
         try {
-            await deleteComment(comment.id);
+            await deleteComment(id);
 
-            // Create activity for comment deletion
             await createActivity({
                 task_id: selectedTask?.id as string,
                 user_id: user?.id as string,
@@ -80,18 +85,50 @@ export const Comment: FC<Props> = ({ comment }) => {
                     { type: 'date', value: new Date().toISOString() },
                 ],
             });
+            await reloadCommentTask();
         } catch (error) {
             toast({
                 title: 'Failed to delete comment',
                 variant: 'destructive',
             });
-        }
+        } 
     };
 
     const handleCancel = () => {
         setDescription(comment.content); // Reset to original content
         setEditable(false);
     };
+
+
+    const handleSaveReply = async () => {
+        if (!replyContent.trim() || !selectedTask?.id || !user?.id) return;
+
+        try {
+            setIsReplying(true);
+            await createComment({
+                task_id: selectedTask.id,
+                user_id: user.id,
+                parent_id: comment.id,
+                content: replyContent,
+            });
+            setReplyContent('');
+            setIsExpanded(true);
+
+            toast({
+                title: "Reply posted successfully",
+                variant: "default",
+            });
+        } catch (error) {
+            toast({
+                title: 'Failed to add reply',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsReplying(false);
+        }
+    };
+
+
 
     return (
         <div className="border border-sky-200 dark:border-blue-900 rounded">
@@ -142,7 +179,7 @@ export const Comment: FC<Props> = ({ comment }) => {
                                     <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                                         <AlertDialogAction
-                                            onClick={handleDeleteComment}
+                                            onClick={() => handleDeleteComment(comment.id as string)}
                                             className="bg-red-500 hover:bg-red-600"
                                         >
                                             Delete
@@ -189,6 +226,108 @@ export const Comment: FC<Props> = ({ comment }) => {
                         onChange={setDescription}
                         isEditable={false}
                     />
+                )}
+            </div>
+        
+            <div className="px-4 pb-2">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-gray-500 flex items-center gap-1">
+                        <Reply className="w-4 h-4" />
+                        <span>{replyCount} {replyCount === 1 ? 'Reply' : 'Replies'}</span>
+                    </div>
+
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="p-1 h-6"
+                    >
+                        <ChevronDown
+                            className={`w-4 h-4 transition-transform duration-400 ${isExpanded ? "rotate-180" : "rotate-0"}`}
+                        />
+                    </Button>
+                </div>
+
+                {isExpanded && (
+                    <>
+                        {replyCount > 0 && (
+                            <div className="space-y-3 mt-3 pl-4 pt-3 border-l-2 border-gray-200 dark:border-gray-700">
+                                {replies?.map((reply) => (
+                                    <div key={reply.id} className="flex gap-3 group">
+                                        <div className="flex-shrink-0">
+                                            <UserCard
+                                                id={reply.user?.id ?? ''}
+                                                name={reply.user?.name ?? 'Unknown User'}
+                                                description={reply.user?.description ?? ''}
+                                                avatarUrl={reply.user?.avatar ?? ''}
+                                                showPreviewName={false}
+                                            />
+                                        </div>
+
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-start gap-2">
+                                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                    <span className='pr-2 text-white'>{reply.user.name}</span>
+                                                    {new Date(reply.created_at).toLocaleString()}
+                                                </div>
+
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                                                <Ellipsis className="w-4 h-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem 
+                                                                className='text-red-500'
+                                                                onClick={() => handleDeleteComment(reply.id)}
+                                                            >
+                                                                <Trash/>
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-1 py-3 px-3 text-sm rounded-sm bg-muted dark:bg-muted/40">
+                                                {reply.content}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="space-y-2 pt-4">
+                            <Textarea
+                                placeholder="Write your reply..."
+                                value={replyContent}
+                                onChange={(e) => setReplyContent(e.target.value)}
+                                className="min-h-[80px]"
+                            />
+                            <div className="flex justify-end gap-2 pt-1">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setReplyContent('');
+                                        setIsExpanded(true); 
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    onClick={handleSaveReply}
+                                    disabled={!replyContent.trim() || isReplying}
+                                >
+                                    {isReplying ? "Posting..." : "Post Reply"}
+                                </Button>
+                            </div>
+                        </div>
+                    </>
                 )}
             </div>
         </div>

@@ -11,7 +11,7 @@ export const useCommentQueries = (taskId: string) => {
     const queryClient = useQueryClient();
 
     // Fetch all comments for a task
-    const { data: taskComments, isLoading } = useQuery<CommentResponse[]>({
+    const { data: taskComments, refetch: refetchCommentsTask, isLoading } = useQuery<CommentResponse[]>({
         queryKey: ['comments', taskId],
         queryFn: () => comments.getTaskComments(taskId),
         enabled: !!taskId,
@@ -19,20 +19,49 @@ export const useCommentQueries = (taskId: string) => {
         gcTime: 1000 * 60 * 30, // 30 minutes
     });
 
+    // reload
+    const reloadCommentTask = async () => {
+        await queryClient.invalidateQueries({
+            queryKey: ['comments', taskId],
+        });
+        return refetchCommentsTask();
+    };
+
     // Create a new comment
     const { mutate: createComment } = useMutation({
         mutationFn: (newComment: {
             task_id: string;
             user_id: string;
+            parent_id?: string;
             content: string;
         }) => comments.create(newComment),
         onSuccess: (newComment) => {
-            // Optimistically update the comments list
             queryClient.setQueryData<CommentResponse[]>(
                 ['comments', taskId],
                 (oldComments) => {
                     if (!oldComments) return [newComment];
-                    return [...oldComments, newComment]; // Add to end since we show oldest first
+
+                    if (newComment.parent_id) {
+                        return oldComments.map((comment) => {
+                            if (comment.id === newComment.parent_id) {
+                                console.log({
+                                    ...comment,
+                                    replies: [...(comment.replies || []), newComment],
+                                });
+                                return {
+                                    ...comment,
+                                    replies: [...(comment.replies || []), newComment],
+                                };
+                            }
+                            console.log({
+                                ...comment,
+                                replies: [...(comment.replies || []), newComment],
+                            });
+                            return comment;
+                        });
+                    }
+
+                    return [...oldComments, newComment];
                 }
             );
         },
@@ -79,6 +108,7 @@ export const useCommentQueries = (taskId: string) => {
     return {
         taskComments,
         isLoading,
+        reloadCommentTask,
         createComment,
         deleteComment,
         updateComment,

@@ -32,7 +32,11 @@ export function DynamicBreadcrumb({ projectId, projectName }: DynamicBreadcrumbP
         breadcrumbItems = [
             { label: "Manage Access" },
         ];
-    }
+    } else if (pathname === `/projects/${projectId}/assigned-tasks`) {
+    breadcrumbItems = [
+        { label: "Assigned Tasks" },
+    ];
+}
 
     return (
         <Breadcrumb>

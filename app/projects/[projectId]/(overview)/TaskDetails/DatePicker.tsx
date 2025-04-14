@@ -9,12 +9,13 @@ import { format } from 'date-fns';
 interface DatePickerProps {
     date?: Date;
     onSelect: (date: Date | undefined) => void;
+    disabled: boolean;
 }
 
-export const DatePicker = ({ date, onSelect }: DatePickerProps) => {
+export const DatePicker = ({ date, onSelect, disabled }: DatePickerProps) => {
     return (
         <Popover>
-            <PopoverTrigger>
+            <PopoverTrigger disabled={disabled}>
                 {date ? (
                     <span className="text-xs text-gray-700 dark:text-gray-300">
                         {format(date, 'PPP')}

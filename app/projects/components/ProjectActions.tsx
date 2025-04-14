@@ -47,7 +47,7 @@ export const ProjectActions = ({
                 ) : (
                     <>
                         <DropdownMenuItem asChild>
-                            <Link href={`/projects/${project.id}/settings`}>Edit</Link>
+                            <Link href={`/projects/${project.id}/settings/project-settings`}>Edit</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             className={cn(deleteButton)}

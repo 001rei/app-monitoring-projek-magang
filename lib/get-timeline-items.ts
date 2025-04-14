@@ -5,6 +5,9 @@ export const getTimelineItems = (
     activities: ActivityResponse[],
     comments: CommentResponse[]
 ) => {
+
+    const filteredComments = comments.filter(( c ) => c.parent_id === null);
+
     const timelineItems: ITimeline[] = [
         ...activities.map((activity) => ({
             id: uid(),
@@ -13,7 +16,7 @@ export const getTimelineItems = (
             value: activity,
         })),
 
-        ...comments.map((comment) => ({
+        ...filteredComments.map((comment) => ({
             id: uid(),
             created_at: new Date(comment.created_at),
             type: 'comment' as TimelineType,

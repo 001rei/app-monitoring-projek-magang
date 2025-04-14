@@ -1,4 +1,5 @@
 'use client';
+
 import { useTaskDetails } from '../TaskDetailsContext';
 import { useProjectQueries } from '@/hooks/useProjectQueries';
 import { useTaskQueries } from '@/hooks/useTaskQueries';
@@ -21,16 +22,20 @@ import { UserCard } from '@/components/UserCard';
 import { useActivityQueries } from '@/hooks/useActivityQueries';
 import { useProjectOwner } from '@/hooks/useProjectOwner';
 import { TaskActivity } from '@/types';
+import { useAssignedTasksQueries } from '@/hooks/useAssignedTasksQueries';
 
 export const Assignees = () => {
     const params = useParams();
     const { selectedTask } = useTaskDetails();
+    const { user } = useCurrentUser();
     const { members, reloadProjectTasks } = useProjectQueries(
         params.projectId as string
     );
+    const { reloadAssignedTasks } = useAssignedTasksQueries(
+        params.projectId as string, user?.id as string
+    )
     const { task, updateAssignees } = useTaskQueries(selectedTask?.id || '');
     const { createActivities } = useActivityQueries(selectedTask?.id || '');
-    const { user } = useCurrentUser();
     const { owner } = useProjectOwner(params.projectId as string);
 
     const [filter, setFilter] = useState('');
@@ -91,6 +96,7 @@ export const Assignees = () => {
             // Update the assignees first
             await updateAssignees(selectedAssignees);
             await reloadProjectTasks();
+            await reloadAssignedTasks();
 
             // Create activities for both additions and removals
             const activities: {
@@ -178,6 +184,7 @@ export const Assignees = () => {
         if (user?.id) {
             await updateAssignees([user.id]);
             await reloadProjectTasks();
+            await reloadAssignedTasks();
 
             // Create self-assignment activity
             await createActivities([
@@ -194,7 +201,6 @@ export const Assignees = () => {
                     ],
                 },
             ]);
-
             setSelectedAssignees([user.id]);
         }
     };

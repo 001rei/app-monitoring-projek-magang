@@ -5,6 +5,7 @@ import {
     Command,
     Settings2,
     ListTodo,
+    ClipboardList
 } from "lucide-react"
 
 import { NavMain } from "./nav-main"
@@ -35,6 +36,12 @@ export function AppSidebar({ projectId, projectName, projectCode, user, ...props
             title: "Phase Activities",
             url: `/projects/${projectId}`,
             icon: ListTodo,
+            isActive: true,
+        },
+        {
+            title: "Assigned Tasks",
+            url: `/projects/${projectId}/assigned-tasks`,
+            icon: ClipboardList,
             isActive: true,
         },
         {

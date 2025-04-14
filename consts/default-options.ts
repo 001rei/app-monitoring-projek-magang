@@ -5,33 +5,33 @@ export const defaultPhases: ICustomFieldData[] = [
     {
         id: uid(),
         label: 'Perencanaan',
-        order: 0,
+        phase_order: 1,
         status: 1,
     },
     {
         id: uid(),
         label: 'Pendefinisian',
-        order: 1,
+        phase_order: 2,
     },
     {
         id: uid(),
         label: 'Pengembangan',
-        order: 2
+        phase_order: 3
     },
     {
         id: uid(),
         label: 'Testing Plan',
-        order: 3
+        phase_order: 4
     },
     {
         id: uid(),
         label: 'Implementasi',
-        order: 4
+        phase_order: 5
     },
     {
         id: uid(),
         label: 'PIR',
-        order: 5
+        phase_order: 6
     },
 ];  
 

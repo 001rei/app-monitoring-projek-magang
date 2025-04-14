@@ -2,10 +2,10 @@
 import { Separator } from '@/components/ui/separator';
 import { UserCard } from '@/components/UserCard';
 import { useEffect } from 'react';
+import { ITaskWithOptions } from '@/types';
 import { TaskDetails } from '../(overview)/TaskDetails';
 import { HeaderSection } from '../(overview)/TaskDetails/HeaderSection';
 import { useTaskDetails } from '../(overview)/TaskDetailsContext';
-import { ITaskWithOptions } from '@/types';
 
 export const SingleTaskDetails = ({ task }: { task: ITaskWithOptions }) => {
     const { setSelectedTask } = useTaskDetails();
@@ -17,7 +17,7 @@ export const SingleTaskDetails = ({ task }: { task: ITaskWithOptions }) => {
     }, [task]);
 
     return (
-        <div className="container py-4">
+        <div className="container p-10">
             <div className="flex">
                 <HeaderSection
                     title={task?.title || ''}

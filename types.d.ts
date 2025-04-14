@@ -87,12 +87,19 @@ interface IComment {
     content: string;
     user_id: string;
     task_id: string;
+    parent_id?: string;
     created_at: Date;
     updated_at: Date;
 }
 
 interface CommentResponse extends Omit<IComment, 'user_id'> {
     user: Partial<IUser>;
+    replies?: Array<{
+        id: string;
+        content: string;
+        created_at: Date;
+        user: Partial<IUser>;
+    }>;
 }
 
 type ActivityType = 'status' | 'priority' | 'date' | 'user' | 'users';
@@ -134,6 +141,7 @@ interface ITimeline {
 interface ICustomFieldData {
     id: string;
     order?: number;
+    phase_order?: number;
     status?: number;
     label?: string;
     color?: string;

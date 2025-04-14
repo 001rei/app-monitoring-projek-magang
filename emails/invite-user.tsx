@@ -27,7 +27,7 @@ export const InviteUserEmail = ({
     projectName,
     inviteLink,
 }: InviteUserEmailProps) => {
-    const previewText = `Join ${projectName} on ProjeX`;
+    const previewText = `Join ${projectName} on Orchestra.`;
 
     return (
         <Html>
@@ -76,7 +76,7 @@ InviteUserEmail.PreviewProps = {
     username: 'John Doe',
     invitedByUsername: 'Jane Doe',
     projectName: 'Enigma',
-    inviteLink: 'https://projex.com/project/invite/foo',
+    inviteLink: 'https://orchestra.com/project/invite/foo',
 } as InviteUserEmailProps;
 
 export default InviteUserEmail;

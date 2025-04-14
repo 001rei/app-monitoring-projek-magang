@@ -109,8 +109,9 @@ const MemoizedTimelineItem = React.memo(
         }
         return (
             <div className="bg-white dark:bg-gray-950 my-6 ml-[-2rem]">
-                <Comment comment={item.value as CommentResponse} />
+                <Comment key={item.value.id} comment={item.value as CommentResponse} />
             </div>
+            
         );
     }
 );

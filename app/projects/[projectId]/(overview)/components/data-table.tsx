@@ -18,7 +18,6 @@ import AddTaskDialog from "./AddTaskDialog"
 import PhaseDatePicker from "./PhaseDatePicker"
 import { CalendarDays } from "lucide-react"
 import { PhaseAction } from "./PhaseAction"
-import { useProjectQueries } from "@/hooks/useProjectQueries"
 import { usePhaseQueries } from "@/hooks/usePhaseQueries"
 
 interface DataTableProps<TData, TValue> {
@@ -62,7 +61,7 @@ export function DataTable<TData, TValue>({ columns, data, label, projectId }: Da
 
     const phaseLabel = phase?.length ? phase[0].label : '';
     const phaseId = phase?.length ? phase[0].id : '';
-    const phaseOrder = phase?.length ? phase[0].order : '';
+    const phaseOrder = phase?.length ? phase[0].phase_order : '';
     
     const startDate = table.getRowModel().rows?.length && table.getRowModel().rows[0].original.phase_id.startDate
         ? new Date(table.getRowModel().rows[0].original.phase_id.startDate)
@@ -79,7 +78,7 @@ export function DataTable<TData, TValue>({ columns, data, label, projectId }: Da
                         <CalendarDays className="h-4 w-4 text-blue-600 dark:text-blue-300 mr-1" />
                         <p className="text-sm text-blue-900 dark:text-blue-100">
                             <strong>Current Phase Period</strong>:{" "}
-                            {startDate ? startDate.toDateString() : "Not set"} - {endDate ? endDate.toDateString() : ""}
+                            {startDate ? startDate.toDateString() + ' -' : "Not set"}  {endDate ? endDate.toDateString() : ""}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">

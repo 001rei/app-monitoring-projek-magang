@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 interface DeleteProjectDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onConfirm: () => void;
+    onConfirm: () => Promise<void>; // Mengubah menjadi async function
     projectName: string;
 }
 
@@ -25,6 +25,18 @@ export const DeleteProjectDialog = ({
     projectName,
 }: DeleteProjectDialogProps) => {
     const [confirmName, setConfirmName] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleConfirm = async () => {
+        if (confirmName !== projectName) return;
+
+        setIsDeleting(true);
+        try {
+            await onConfirm();
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -52,15 +64,15 @@ export const DeleteProjectDialog = ({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
                         Cancel
                     </Button>
                     <Button
                         variant="destructive"
-                        onClick={onConfirm}
-                        disabled={confirmName !== projectName}
+                        onClick={handleConfirm}
+                        disabled={isDeleting}
                     >
-                        {confirmName !== projectName ? 'Delete Project' : 'Deleting...'}
+                        {isDeleting ? 'Deleting...' : 'Delete Project'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -1,11 +1,3 @@
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import {
     SidebarInset,
@@ -23,8 +15,6 @@ interface Props {
     params: { projectId: string };
     children: React.ReactNode;
 }
-
-
 
 export default async function Layout({ params, children }: Props) {
     const { projectId } = await params;
@@ -64,7 +54,7 @@ export default async function Layout({ params, children }: Props) {
                     </div>
                 </header>
                 <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                    <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/75 dark:bg-muted/50 md:min-h-min">
+                    <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/75 dark:bg-muted/30 md:min-h-min">
                         {children}
                     </div>
                 </div>

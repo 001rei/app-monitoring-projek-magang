@@ -44,7 +44,38 @@ export const tasks = {
                 .eq('label', phaseLabel)
             if (error) throw error;
             return data;
-        }
+        },
+
+        getUserTasks: async (projectId: string, userId: string) => {
+            const { data, error } = await supabase
+                .from('tasks')
+                .select(`
+                        id,
+                        title,
+                        phase_id ( * ),
+                        parent_task_id,
+                        phase_label,
+                        creator:created_by (id,name,avatar),
+                        priority ( id, label, color, "order"),
+                        status ( id, label, color, "order"),
+                        startDate,
+                        endDate,
+                        task_assignees !inner (
+                            users ( id, name, avatar, description )
+                        )
+                    `)
+                .eq('project_id', projectId)
+                .eq('task_assignees.user_id', userId); 
+
+            if (error) throw error;
+            console.log(data);
+            console.log('run2');
+
+            return data.map((task) => ({
+                ...task,
+                assignees: task.task_assignees?.map((a) => a.users) || [],
+            })) as any[];
+        },
     },
 
     details: {
@@ -69,9 +100,7 @@ export const tasks = {
 
             return {
                 ...data,
-                labels: data.task_labels?.map((tl: any) => tl.labels) || [],
                 assignees: data.task_assignees?.map((a: any) => a.users) || [],
-                task_labels: null,
                 task_assignees: null,
             } as ITaskWithOptions;
         },

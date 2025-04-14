@@ -1,8 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { secondaryButton, successButton } from '@/consts/buttonStyles';
+import { useAssignedTasksQueries } from '@/hooks/useAssignedTasksQueries';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useProjectQueries } from '@/hooks/useProjectQueries';
 import { cn } from '@/lib/utils';
 import { Check, X } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { Dispatch, SetStateAction, useState } from 'react';
 
 interface Props {
@@ -20,22 +24,31 @@ export const EditableTitle = ({
 }: Props) => {
     const [text, setText] = useState(title);
     const [isSaving, setIsSaving] = useState(false);
+    const params = useParams();
+    const { user } = useCurrentUser();
+    const { reloadAssignedTasks } = useAssignedTasksQueries(
+        params.projectId as string, user?.id as string
+    )
+    const { reloadProjectTasks } = useProjectQueries(
+        params.projectId as string
+    );
 
     const handleSave = async () => {
         try {
             setIsSaving(true);
             await onSave(text);
+            await reloadProjectTasks();
+            await reloadAssignedTasks();
             setIsEditing(false);
         } catch (error) {
             console.error('Failed to save title:', error);
-            // Optionally add error handling UI here
         } finally {
             setIsSaving(false);
         }
     };
 
     const handleCancel = () => {
-        setText(title); // Reset to original title
+        setText(title);
         setIsEditing(false);
     };
 

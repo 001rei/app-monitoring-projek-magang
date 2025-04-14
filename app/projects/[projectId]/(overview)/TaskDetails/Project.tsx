@@ -18,6 +18,7 @@ import { toast } from '@/hooks/use-toast';
 import { TaskActivity } from '@/types';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useActivityQueries } from '@/hooks/useActivityQueries';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const Project = () => {
     const params = useParams();
@@ -215,12 +216,17 @@ export const Project = () => {
     const sortedPriorities = priorities?.sort((a, b) => a.order - b.order);
     const sortedStatuses = statuses?.sort((a, b) => a.order - b.order);
 
+    const isTaskDone = task?.status?.label === 'Done';
+
     return (
         <>
             <div className="flex justify-between text-gray-500 py-2">
                 <span className="text-xs">Priority</span>
                 <DropdownMenu>
-                    <DropdownMenuTrigger className="text-xs">
+                    <DropdownMenuTrigger
+                        className="text-xs"
+                        disabled={isTaskDone}
+                    >
                         {task?.priority ? (
                             <CustomFieldTagRenderer
                                 color={task.priority.color}
@@ -240,16 +246,23 @@ export const Project = () => {
                             <div className="flex-grow">None</div>
                         </DropdownMenuItem>
                         {sortedPriorities?.map((priority) => (
-                            <DropdownMenuItem
-                                key={priority.id}
-                                onClick={() => handlePrioritySelect(priority.id)}
-                            >
-                                <span
-                                    className="w-3 h-3 mr-2 border rounded-full"
-                                    style={{ borderColor: priority.color }}
-                                />
-                                <div className="flex-grow">{priority.label}</div>
-                            </DropdownMenuItem>
+                            <Tooltip key={priority.id}>
+                                <TooltipTrigger asChild>
+                                    <DropdownMenuItem
+                                        onClick={() => handlePrioritySelect(priority.id)}
+                                        className="flex items-center w-full"
+                                    >
+                                        <span
+                                            className="w-3 h-3 mr-2 border rounded-full"
+                                            style={{ borderColor: priority.color }}
+                                        />
+                                        <div className="flex-grow">{priority.label}</div>
+                                    </DropdownMenuItem>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" align="start" sideOffset={13}>
+                                    <p>{priority.description}</p>
+                                </TooltipContent>
+                            </Tooltip>
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -258,7 +271,10 @@ export const Project = () => {
             <div className="flex justify-between text-gray-500 py-2">
                 <span className="text-xs">Status</span>
                 <DropdownMenu>
-                    <DropdownMenuTrigger className="text-xs">
+                    <DropdownMenuTrigger
+                        className="text-xs"
+                        disabled={isTaskDone} 
+                    >
                         {task?.status ? (
                             <CustomFieldTagRenderer
                                 color={task.status.color}
@@ -269,25 +285,32 @@ export const Project = () => {
                         )}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="mr-4">
-                        <DropdownMenuLabel className="text-xs">Set Staus</DropdownMenuLabel>
+                        <DropdownMenuLabel className="text-xs">Set Status</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleStatusSelect(null)}>
                             <span className="w-3 h-3 mr-2" />
                             <div className="flex-grow">None</div>
                         </DropdownMenuItem>
                         {sortedStatuses
-                            ?.filter((status) => status.label !== 'Done') 
+                            ?.filter((status) => status.label !== 'Done')
                             .map((status) => (
-                                <DropdownMenuItem
-                                    key={status.id}
-                                    onClick={() => handleStatusSelect(status.id)}
-                                >
-                                    <span
-                                        className="w-3 h-3 mr-2 border rounded-full"
-                                        style={{ borderColor: status.color }}
-                                    />
-                                    <div className="flex-grow">{status.label}</div>
-                                </DropdownMenuItem>
+                                <Tooltip key={status.id}>
+                                    <TooltipTrigger asChild>
+                                        <DropdownMenuItem
+                                            onClick={() => handleStatusSelect(status.id)}
+                                            className="flex items-center w-full"
+                                        >
+                                            <span
+                                                className="w-3 h-3 mr-2 border rounded-full"
+                                                style={{ borderColor: status.color }}
+                                            />
+                                            <div className="flex-grow">{status.label}</div>
+                                        </DropdownMenuItem>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" align="start" sideOffset={13}>
+                                        <p>{status.description}</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -297,7 +320,8 @@ export const Project = () => {
                 <span className="text-xs">Start date</span>
                 <DatePicker
                     date={startDate}
-                    onSelect={(date) => handleDateChange('startDate', date)}
+                    onSelect={(date) => !isTaskDone && handleDateChange('startDate', date)}
+                    disabled={isTaskDone} 
                 />
             </div>
 
@@ -305,7 +329,8 @@ export const Project = () => {
                 <span className="text-xs">End date</span>
                 <DatePicker
                     date={endDate}
-                    onSelect={(date) => handleDateChange('endDate', date)}
+                    onSelect={(date) => !isTaskDone && handleDateChange('endDate', date)} 
+                    disabled={isTaskDone} 
                 />
             </div>
         </>
