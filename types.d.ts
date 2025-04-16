@@ -61,6 +61,15 @@ export interface IPriority {
     created_at: Date;
 }
 
+export interface IMilestone {
+    id: string;
+    phase_label: string;
+    label: string;
+    description: string;
+    color: string;
+    milestone_order: number;
+}
+
 interface ITask {
     id: string;
     project_id: string;
@@ -70,6 +79,7 @@ interface ITask {
 
     status: string | null;
     priority: string | null;
+    milestone: string | null;
     title: string;
     description: string;
     startDate: Date | null;
@@ -203,6 +213,13 @@ interface ITaskWithOptions extends Partial<ITask> {
         actualEndDate: Date;
         status: number;
         phase_order: number;
+    };
+    milestone?: {
+        id: string;
+        label: string;
+        color: string;
+        milestone_order: number;
+        description?: string;
     };
 }
 

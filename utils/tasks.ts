@@ -20,6 +20,7 @@ export const tasks = {
                     creator:created_by (id,name,avatar),
                     priority ( id, label, color, "order"),
                     status ( id, label, color, "order"),
+                    milestone (id, label, color, milestone_order),
                     startDate,
                     endDate,
                     task_assignees (
@@ -58,6 +59,7 @@ export const tasks = {
                         creator:created_by (id,name,avatar),
                         priority ( id, label, color, "order"),
                         status ( id, label, color, "order"),
+                        milestone (id, label, color, milestone_order),
                         startDate,
                         endDate,
                         task_assignees !inner (
@@ -88,6 +90,7 @@ export const tasks = {
                     creator:created_by ( id, name, avatar, description ),
                     status ( id, label, color, order ),
                     priority ( id, label, color, order ),
+                    milestone (id, label, color, milestone_order),
                     task_assignees (
                         users ( id, name, description, avatar )
                     )

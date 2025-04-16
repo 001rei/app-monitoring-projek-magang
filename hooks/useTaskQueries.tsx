@@ -59,6 +59,15 @@ export const useTaskQueries = (taskId: string) => {
         },
     });
 
+    // Update task milestone
+    const { mutate: updateMilestone } = useMutation({
+        mutationFn: (milestoneId: string | null) =>
+            tasks.details.update(taskId, { milestone: milestoneId }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['task', taskId] });
+        },
+    });
+
     // Update task dates
     const { mutate: updateDates } = useMutation({
         mutationFn: (dates: DateUpdates) =>
@@ -80,6 +89,7 @@ export const useTaskQueries = (taskId: string) => {
         task,
         updateDescription,
         updateAssignees,
+        updateMilestone,
         updatePriority,
         updateStatus,
         updateDates,

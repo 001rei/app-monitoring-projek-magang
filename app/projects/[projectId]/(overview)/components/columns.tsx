@@ -138,14 +138,29 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
         cell: ({ row }) => {
             const isSubtask = row.depth > 0
             const task = row.original
+            const milestone = row.original.milestone
             const currentStatus = task.status || { id: "unknown", label: "Unknown", color: "gray" }
+
             return (
-                <div
-                    className={`${isSubtask ? "pl-4" : ""} ${currentStatus.label === "Done" ? "line-through text-muted-foreground" : ""}`}
-                >
-                    {task.title}
+                <div className={`flex items-center gap-2 ${isSubtask ? "pl-4" : ""}`}>
+                    {milestone && (
+                        <CustomFieldTagRenderer
+                            color={milestone.color}
+                            label={milestone.label}
+                        />
+                    )}
+
+                    <span
+                        className={`flex-1 truncate ${currentStatus.label === "Done"
+                                ? "line-through text-muted-foreground"
+                                : "text-foreground"
+                            }`}
+                        title={task.title} 
+                    >
+                        {task.title}
+                    </span>
                 </div>
-            )
+            );
         },
     },
     {

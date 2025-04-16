@@ -2,8 +2,6 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTableColumnHeader } from "./data-table-column-header"
-import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
 import { ITaskWithOptions } from "@/types"
 import { CustomFieldTagRenderer } from "@/components/CustomFieldTagRenderer"
 import Link from "next/link"
@@ -18,9 +16,22 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
     cell: ({ row }) => {
       const params = useParams();
       const projectId = params.projectId;
+      const milestone = row.original.milestone
+      
       return (
         <div className="flex space-x-2">
-          {row.original.phase_label && <Badge variant="secondary">{row.original.phase_label}</Badge>}
+          {row.original.phase_label && (
+            <CustomFieldTagRenderer
+              color={'hsl(0, 0%, 75%)'}
+              label={row.original.phase_label}
+            />
+          )}
+          {milestone && (
+            <CustomFieldTagRenderer
+              color={milestone.color}
+              label={milestone.label}
+            />
+          )}
           <span className="max-w-[500px] truncate font-medium">
             <Link
               href={`${location?.origin}/projects/${projectId}/${row.original.id}`}

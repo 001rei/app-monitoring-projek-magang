@@ -121,6 +121,14 @@ export const projects = {
                 .select(`*`)
             if (error) throw error;
             return data;
+        },
+        
+        getMilestones: async () => {
+            const { data, error } = await supabase
+                .from('milestones')
+                .select('*')
+            if (error) throw error;
+            return data;
         }
     },
 

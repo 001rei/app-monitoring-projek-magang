@@ -33,7 +33,7 @@ export function TaskActionsCell({ row }: { row: any }) {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuItem className="cursor-pointer flex items-center" onClick={handleClick}>
+                    <DropdownMenuItem className="cursor-pointer flex items-center text-yellow-500" onClick={handleClick}>
                         <Info className="mr-2 h-4 w-4" />
                         <span>Detail</span>
                     </DropdownMenuItem>

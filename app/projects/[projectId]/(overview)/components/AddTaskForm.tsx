@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { IPriority, IStatus } from "@/types";
+import { IMilestone, IPriority, IStatus } from "@/types";
 import { createClient } from "@/utils/supabase/client";
 import { tasks } from "@/utils/tasks";
 import { toast } from "@/hooks/use-toast";
@@ -21,13 +21,14 @@ import { DateRange } from "react-day-picker";
 interface AddTaskFromProps {
     statuses?: IStatus[];
     priorities?: IPriority[];
+    milestones?: IMilestone[];
     onSuccess?: () => void;
     phaseId: string;
     taskId?: string;
     phaseLabel: string;
 }
 
-export default function AddTaskForm({ statuses, priorities, onSuccess, phaseId, phaseLabel, taskId }: AddTaskFromProps) {
+export default function AddTaskForm({ statuses, priorities, milestones, onSuccess, phaseId, phaseLabel, taskId }: AddTaskFromProps) {
     const params = useParams();
     const projectId = params.projectId;
 
@@ -35,9 +36,14 @@ export default function AddTaskForm({ statuses, priorities, onSuccess, phaseId, 
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState("");
     const [priority, setPriority] = useState("");
+    const [milestone, setMilestone] = useState("");
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined); 
     const [isCreating, setIsCreating] = useState(false);
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
+
+    const filteredMilestones = useMemo(() => {
+        return milestones?.filter(milestone => milestone.phase_label === phaseLabel) || [];
+    }, [milestones, phaseLabel]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,6 +66,7 @@ export default function AddTaskForm({ statuses, priorities, onSuccess, phaseId, 
                 description,
                 status: status || null,   
                 priority: priority || null,   
+                milestone: milestone || null,
                 startDate: dateRange?.from,
                 endDate: dateRange?.to,
                 created_by: user.id,
@@ -112,6 +119,21 @@ export default function AddTaskForm({ statuses, priorities, onSuccess, phaseId, 
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Enter task description"
                 />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="milestone">Milestone</Label>
+                <Select value={milestone} onValueChange={setMilestone}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select milestone" />
+                    </SelectTrigger>
+                    <SelectContent aria-placeholder="Select milestone">
+                        {filteredMilestones?.map((milestone) => (
+                            <SelectItem key={milestone.id} value={milestone.id}>
+                                {milestone.description ? milestone.description : milestone.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
             <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>

@@ -24,7 +24,7 @@ interface AddTaskDialogProps {
 
 export default function AddTaskDialog({phaseId, phaseLabel, taskId, taskTitle, isOpen, onOpenChange}: AddTaskDialogProps) {
     const params = useParams();
-    const { statuses, priorities } = useProjectQueries(params.projectId as string);
+    const { statuses, priorities, milestones } = useProjectQueries(params.projectId as string);
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -46,6 +46,7 @@ export default function AddTaskDialog({phaseId, phaseLabel, taskId, taskTitle, i
                     phaseLabel={phaseLabel}
                     statuses={statuses}
                     priorities={priorities}
+                    milestones={milestones}
                     taskId={taskId}
                     onSuccess={() => onOpenChange?.(false)}
                 />

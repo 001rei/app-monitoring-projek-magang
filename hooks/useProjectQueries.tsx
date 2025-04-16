@@ -12,7 +12,7 @@ export const useProjectQueries = (projectId: string, taskId?: string, phaseLabel
         enabled: !!projectId,
         staleTime: Infinity, 
         gcTime: 1000 * 60 * 30,
-    });
+    }); 
 
     // Fetch project statuses
     const { data: statuses, refetch: refetchStatuses } = useQuery({
@@ -23,10 +23,19 @@ export const useProjectQueries = (projectId: string, taskId?: string, phaseLabel
         gcTime: 1000 * 60 * 30,
     });
 
-    // Fetch project labels
+    // Fetch project priorities
     const { data: priorities, refetch: refetchPriorities } = useQuery({
-        queryKey: ['project-labels', projectId],
+        queryKey: ['project-priorities', projectId],
         queryFn: () => projects.fields.getPriorities(),
+        enabled: !!projectId,
+        staleTime: Infinity,
+        gcTime: 1000 * 60 * 30,
+    });
+
+    // Fetch project milestones
+    const { data: milestones, refetch: refetchMilestones } = useQuery({
+        queryKey: ['project-milestones', projectId],
+        queryFn: () => projects.fields.getMilestones(),
         enabled: !!projectId,
         staleTime: Infinity,
         gcTime: 1000 * 60 * 30,
@@ -70,6 +79,13 @@ export const useProjectQueries = (projectId: string, taskId?: string, phaseLabel
         return refetchMembers();
     };
 
+    const reloadProjectMilestones = async () => {
+        await queryClient.invalidateQueries({
+            queryKey: ['project-milestones', projectId],
+        });
+        return refetchMilestones();
+    };
+
     // Update task status on table
     const { mutate: updateStatusOnTable } = useMutation({
         mutationFn: (statusId: string | null) =>
@@ -86,6 +102,7 @@ export const useProjectQueries = (projectId: string, taskId?: string, phaseLabel
         priorities,
         isLoading,
         members,
+        milestones,
         // reload functions
         reloadProjectTasks,
         reloadStatuses,

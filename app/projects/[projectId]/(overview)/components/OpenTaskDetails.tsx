@@ -29,7 +29,7 @@ export default function OpenTaskDetails({ row }: Props) {
                     updates: Partial<ITaskWithOptions>
                 ) => {
                     try {
-                        if ('status' in updates || 'priority' in updates || 'startDate' in updates ||
+                        if ('milestone' in updates || 'status' in updates || 'priority' in updates || 'startDate' in updates ||
                             'endDate' in updates) {
                             await reloadProjectTasks();
                             await reloadAssignedTasks();
