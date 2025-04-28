@@ -13,18 +13,24 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { useProjectQueries } from "@/hooks/useProjectQueries";
 import { useParams } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useBoardQueries } from "@/hooks/useBoardQueries";
 
 interface Props {
     phaseId: string;
+    phaseStatus: number;
 }
 
-export default function PhaseDatePicker({ phaseId }: Props) {
+export default function PhaseDatePicker({ phaseId, phaseStatus }: Props) {
     const params = useParams();
     const projectId = params.projectId;
+    const isPhaseDone = phaseStatus === 2;
 
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isLoading, setIsLoading] = useState(false);
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
+    const { user } = useCurrentUser();
+    const { reloadBoard } = useBoardQueries(user?.id as string)
 
     const isDateDisabled = (date: Date) => {
         const today = new Date();
@@ -69,6 +75,7 @@ export default function PhaseDatePicker({ phaseId }: Props) {
                 })
                 .eq("id", phaseId); 
             await reloadProjectTasks();
+            await reloadBoard();
 
             if (error) {
                 throw error;
@@ -96,7 +103,7 @@ export default function PhaseDatePicker({ phaseId }: Props) {
                 <Button
                     variant="ghost"
                     className="w-10 h-10 p-0 flex items-center justify-center"
-                    disabled={isLoading}
+                    disabled={isLoading || isPhaseDone}
                 >
                     <CalendarIcon className="h-4 w-4" />
                 </Button>

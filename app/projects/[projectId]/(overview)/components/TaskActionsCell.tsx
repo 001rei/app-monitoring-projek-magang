@@ -3,14 +3,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { MoreVertical, Info, Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
 import { useTaskDetails } from "../TaskDetailsContext";
 import { prefetchTask } from "@/hooks/useTaskQueries";
 import AddTaskDialog from "./AddTaskDialog";
-import { DeleteConfirmationDialog } from "./DeleteTaskDialog";
 
 export function TaskActionsCell({ row }: { row: any }) {
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isAddSubtaskDialogOpen, setIsAddSubtaskDialogOpen] = useState(false);
 
     const queryClient = useQueryClient();
@@ -22,6 +19,8 @@ export function TaskActionsCell({ row }: { row: any }) {
     };
 
     const isSubtask = row.depth > 0;
+    const phaseStatus = row.original.phase_id?.status as number;
+    const isPhaseDone = phaseStatus === 2;
 
     return (
         <>
@@ -38,7 +37,7 @@ export function TaskActionsCell({ row }: { row: any }) {
                         <span>Detail</span>
                     </DropdownMenuItem>
 
-                    {!isSubtask && (
+                    {!isSubtask && !isPhaseDone && (
                         <DropdownMenuItem className="cursor-pointer flex items-center" onSelect={() => setIsAddSubtaskDialogOpen(true)}>
                             <Plus className="mr-2 h-4 w-4" />
                             <span>Add Subtask</span>
@@ -47,7 +46,7 @@ export function TaskActionsCell({ row }: { row: any }) {
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {!isSubtask && (
+            {!isSubtask && !isPhaseDone && (
                 <AddTaskDialog
                     isOpen={isAddSubtaskDialogOpen}
                     onOpenChange={setIsAddSubtaskDialogOpen}
@@ -55,6 +54,7 @@ export function TaskActionsCell({ row }: { row: any }) {
                     taskTitle={row.original.title as string}
                     phaseId={row.original.phase_id as string}
                     phaseLabel={row.original.phase_label as string}
+                    phaseStatus={phaseStatus}
                 />
             )}
         </>

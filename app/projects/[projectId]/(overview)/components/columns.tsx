@@ -222,7 +222,7 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
         sortingFn: (rowA, rowB, columnId) => {
             const orderA = rowA.original.priority?.order || Infinity;
             const orderB = rowB.original.priority?.order || Infinity;
-            return orderA - orderB; 
+            return orderB - orderA; 
         },
 
     },

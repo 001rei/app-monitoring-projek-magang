@@ -94,7 +94,7 @@ export const Assignees = () => {
             );
 
             // Update the assignees first
-            await updateAssignees(selectedAssignees);
+            updateAssignees(selectedAssignees);
             await reloadProjectTasks();
             await reloadAssignedTasks();
 
@@ -182,7 +182,7 @@ export const Assignees = () => {
 
     const handleAssignSelf = async () => {
         if (user?.id) {
-            await updateAssignees([user.id]);
+            updateAssignees([user.id]);
             await reloadProjectTasks();
             await reloadAssignedTasks();
 

@@ -40,6 +40,11 @@ export interface IPhase {
     id: string;
     project_id?: string;
     label: string;
+    startDate?: Date;
+    endDate?: Date;
+    actualEndDate?: Date;
+    status?: number;
+    phase_order?: number;
     created_at: Date;
 }
 
@@ -226,3 +231,18 @@ interface ITaskWithOptions extends Partial<ITask> {
 interface MemberWithUser extends IProjectMember {
     user: Pick<IUser, 'id' | 'name' | 'email' | 'avatar'>;
 }
+
+type BoardProject = {
+    id: string;
+    label: string;
+    endDate: Date;
+    details: {
+        id: string;
+        name: string;
+        description: string;
+        project_code: string;
+        category: string;
+        total_tasks: number;
+        done_tasks: number;
+    } | null;
+};

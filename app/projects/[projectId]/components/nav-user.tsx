@@ -8,6 +8,7 @@ import {
     FolderKanban,
     FolderPlus,
     LogOut,
+    PanelTop,
     Sparkles,
     User,
 } from "lucide-react"
@@ -113,6 +114,12 @@ export function NavUser({ userData }: Props ) {
                             <Link href="/projects" className="w-full cursor-pointer">
                                 <FolderKanban className="mr-2 h-4 w-2" />
                                 <span>Projects</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href="/board" className="w-full cursor-pointer">
+                                <PanelTop className="mr-2 h-4 w-2" />
+                                <span>Board</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

@@ -12,20 +12,20 @@ export const tasks = {
                 .from('tasks')
                 .select(
                     `
-                    id,
-                    title,
-                    phase_id ( * ),
-                    parent_task_id,
-                    phase_label,
-                    creator:created_by (id,name,avatar),
-                    priority ( id, label, color, "order"),
-                    status ( id, label, color, "order"),
-                    milestone (id, label, color, milestone_order),
-                    startDate,
-                    endDate,
-                    task_assignees (
-                        users ( id, name, avatar, description )
-                    )
+                        id,
+                        title,
+                        phase_id ( * ),
+                        parent_task_id,
+                        phase_label,
+                        creator:created_by (id,name,avatar),
+                        priority ( id, label, color, "order"),
+                        status ( id, label, color, "order"),
+                        milestone (id, label, color, milestone_order),
+                        startDate,
+                        endDate,
+                        task_assignees (
+                            users ( id, name, avatar, description )
+                        )
                     `
                 )
                 .eq('project_id', projectId)
@@ -38,11 +38,21 @@ export const tasks = {
         },
 
         getProjectPhase: async (projectId: string, phaseLabel: string) => {
-            const { data, error} = await supabase
+            console.log(phaseLabel, "cokk")
+            const { data, error } = await supabase
                 .from('phases')
                 .select('*')
                 .eq('project_id', projectId)
                 .eq('label', phaseLabel)
+            if (error) throw error;
+            return data;
+        },
+
+        getAllProjectPhase: async (projectId: string) => {
+            const { data, error } = await supabase
+                .from('phases')
+                .select('*')
+                .eq('project_id', projectId)
             if (error) throw error;
             return data;
         },
@@ -67,7 +77,7 @@ export const tasks = {
                         )
                     `)
                 .eq('project_id', projectId)
-                .eq('task_assignees.user_id', userId); 
+                .eq('task_assignees.user_id', userId);
 
             if (error) throw error;
             console.log(data);
@@ -113,7 +123,7 @@ export const tasks = {
             const { error } = await supabase
                 .from('tasks')
                 .insert(task)
-            if (error) throw error; 
+            if (error) throw error;
         },
 
         update: async (taskId: string, updates: Partial<ITask>) => {
@@ -127,9 +137,9 @@ export const tasks = {
                 if (assigneeIds.length > 0) {
                     await supabase.from('task_assignees').insert(
                         assigneeIds.map((userId) => ({
-                            task_id: taskId, 
-                            user_id: userId, 
-                            created_at: new Date(), 
+                            task_id: taskId,
+                            user_id: userId,
+                            created_at: new Date(),
                             updated_at: new Date(),
                         }))
                     );
@@ -152,7 +162,7 @@ export const tasks = {
             return null;
         },
 
-        delete: async (taskId:string) => {
+        delete: async (taskId: string) => {
             const { error } = await supabase
                 .from('tasks')
                 .delete()
@@ -176,4 +186,39 @@ export const tasks = {
             return data as ITask;
         },
     },
+
+    check: {
+        isAllTasksDone: async (projectId: string, phaseLabel: string) => {
+            const DONE_STATUS_ID = '921614a8-4417-4fb9-acb0-cf1536b28e1a';
+
+            try {
+                const { data: tasks, error: tasksError } = await supabase
+                    .from('tasks')
+                    .select('id')
+                    .eq("project_id", projectId)
+                    .eq("phase_label", phaseLabel)
+                    .limit(1);  
+
+                if (tasksError) throw tasksError;
+
+                if (!tasks || tasks.length === 0) return false;
+
+                const { data: notDoneTasks, error: notDoneError } = await supabase
+                    .from("tasks")
+                    .select("id")
+                    .eq("project_id", projectId)
+                    .eq("phase_label", phaseLabel)
+                    .neq("status", DONE_STATUS_ID)
+                    .limit(1);  
+
+                if (notDoneError) throw notDoneError;
+                
+                return !notDoneTasks || notDoneTasks.length === 0;
+            } catch (error) {
+                console.error("Error checking task completion status:", error);
+                throw error;
+            }
+        }
+    }
+
 }

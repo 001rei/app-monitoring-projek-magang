@@ -20,8 +20,7 @@ export default function NewProjectForm() {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('internal');
-    const [phases, setPhases] = useState(defaultPhases);
-    const [tasks, setTasks] = useState(defaultTasks);
+    const [phases] = useState(defaultPhases);
 
     const handleCreateProject = async () => {
         try {
@@ -36,7 +35,6 @@ export default function NewProjectForm() {
                 description,
                 phases,
                 category,
-                tasks
             };
 
             const project = await projects.management.create(

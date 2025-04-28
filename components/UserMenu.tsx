@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { User as UserProfile, FolderKanban, FolderPlus, LogOut, CircleUser } from "lucide-react";
+import { User as UserProfile, FolderKanban, FolderPlus, LogOut, CircleUser, PanelTop } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import Image from "next/image";
 import { auth } from "@/utils/auth";
@@ -67,6 +67,12 @@ export default function UserMenu({ user } : Props) {
                     <Link href="/projects" className="w-full cursor-pointer">
                         <FolderKanban className="mr-2 h-4 w-2" />
                         <span>Projects</span>
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/board" className="w-full cursor-pointer">
+                        <PanelTop className="mr-2 h-4 w-2" />
+                        <span>Board</span>
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

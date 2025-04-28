@@ -14,6 +14,8 @@ import { IProject } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { CloseProjectDialog } from '@/app/projects/components/CloseProjectDialog';
 import { DeleteProjectDialog } from '@/app/projects/components/DeleteProjectDialog';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useBoardQueries } from '@/hooks/useBoardQueries';
 
 interface ProjectSettingsFormProps {
     project: IProject;
@@ -28,6 +30,8 @@ export function ProjectSettingsForm({ project }: ProjectSettingsFormProps) {
         description: project.description,
     });
     const { toast } = useToast();
+    const { user } = useCurrentUser();
+    const { reloadBoard } = useBoardQueries(user?.id as string);
     const router = useRouter();
 
     // const { can, role, isLoading } = useProjectAccess({
@@ -45,6 +49,7 @@ export function ProjectSettingsForm({ project }: ProjectSettingsFormProps) {
         try {
             setIsSaving(true);
             await projects.management.update(project.id, formData);
+            await reloadBoard();
             toast({
                 title: 'Success',
                 description: 'Project settings updated successfully',
