@@ -152,7 +152,7 @@ export default function Board({ userId }: Props) {
 
                             return (
                                 <div key={label} className="flex-shrink-0 w-[320px]">
-                                    <div className="bg-card rounded-lg shadow-sm h-[calc(100vh-150px)] flex flex-col border">
+                                    <div className="bg-card rounded-lg shadow-sm h-[calc(100vh-150px)] flex flex-col border bg-slate-100 dark:bg-slate-950">
                                         <div className="p-3 font-medium flex items-center justify-between border-b">
                                             <div className="flex items-center gap-2">
                                                 {statusIcon}

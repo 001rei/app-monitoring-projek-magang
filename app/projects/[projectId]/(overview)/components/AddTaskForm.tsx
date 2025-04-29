@@ -44,7 +44,6 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
     const [isCreating, setIsCreating] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
-
     const { user } = useCurrentUser();
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
     const { reloadBoard } = useBoardQueries(user?.id as string);

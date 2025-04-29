@@ -52,7 +52,7 @@ export function TaskActionsCell({ row }: { row: any }) {
                     onOpenChange={setIsAddSubtaskDialogOpen}
                     taskId={row.original.id as string}
                     taskTitle={row.original.title as string}
-                    phaseId={row.original.phase_id as string}
+                    phaseId={row.original.phase_id.id as string}
                     phaseLabel={row.original.phase_label as string}
                     phaseStatus={phaseStatus}
                 />

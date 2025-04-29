@@ -1,5 +1,11 @@
 'use client';
 
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 import { IProjectMember, IUser, MemberWithUser, Role } from "@/types";
 import { useState } from "react";
 import InviteUsers from "./InviteUsers";
@@ -30,9 +36,13 @@ export function AccessContainer({
     
     return (
         <>
-            <div className="p-4 rounded-sm bg-muted/90 dark:bg-muted/60 text-sm border">
-                Only those with access to this project can view it.
-            </div>
+            <Alert className="bg-muted/90 dark:bg-muted/60 border" >
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Project Visibility</AlertTitle>
+                <AlertDescription>
+                    Only those with access to this project can view it.
+                </AlertDescription>
+            </Alert>
             <InviteUsers 
                 projectName={projectName as string}
                 projectId={projectId}
