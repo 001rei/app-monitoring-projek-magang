@@ -97,6 +97,18 @@ interface ITask {
     subtasks?: ITask[];
 }
 
+interface ITaskAttachment {
+    id: string;
+    project_id: string;
+    task_id: string;
+    file_path: string;
+    file_name: string;
+    file_type: string;
+    phase_label: string;
+    uploaded_by: string;
+    uploaded_at: Date;
+}
+
 interface IComment {
     id: string;
     content: string;
@@ -226,6 +238,12 @@ interface ITaskWithOptions extends Partial<ITask> {
         milestone_order: number;
         description?: string;
     };
+    task_attachments?: {
+        id: string;
+        file_path: string;
+        file_name: string;
+        file_type: string;
+    }[];
 }
 
 interface MemberWithUser extends IProjectMember {

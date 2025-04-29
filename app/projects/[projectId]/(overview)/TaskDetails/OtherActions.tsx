@@ -122,8 +122,9 @@ export const OtherActions = () => {
         <div className="py-4">
             <Button
                 onClick={() => setIsDialogDeleteOpen(true)}
-                className="flex h-6 py-4 px-4 justify-start w-full text-red-500 bg-transparent hover:bg-red-200 hover:dark:bg-red-950"
+                className="flex h-6 py-4 px-4 justify-start w-full text-red-500 hover:bg-red-200 hover:dark:bg-red-950"
                 disabled={isDeleting}
+                variant={'ghost'}
             >
                 <Trash className="w-3 h-3 mr-2" />
                 {isDeleting ? 'Deleting...' : 'Delete'}
@@ -131,8 +132,9 @@ export const OtherActions = () => {
 
             <Button
                 onClick={() => setIsDialogDoneOpen(true)}
-                className="flex h-6 py-4 px-4 justify-start w-full text-green-500 bg-transparent hover:bg-green-200 hover:dark:bg-green-950"
+                className="flex h-6 py-4 px-4 justify-start w-full text-green-500 hover:bg-green-200 hover:dark:bg-green-950"
                 disabled={isDone || isTaskDone}
+                variant={'ghost'}
             >
                 <Check className="w-3 h-3 mr-2" />
                 {isTaskDone ? 'Already done' : 'Set as done'}

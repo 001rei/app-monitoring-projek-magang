@@ -2,8 +2,6 @@
 
 import { PhotoProfileUploader } from "@/components/ProfilePhotoUploader";
 import { Button } from "@/components/ui/button";
-import { primaryButton } from "@/consts/buttonStyles";
-import { cn } from "@/lib/utils";
 import { IUser } from "@/types"
 import { users } from "@/utils/users";
 import Link from "next/link";

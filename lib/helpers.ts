@@ -77,3 +77,10 @@ export function compareArrays<T extends Identifiable>(
 
     return { isChanged: changedItems.length > 0, data: changedItems };
 }
+
+export const getFileName = (fullUrl: string) => {
+    const url = new URL(fullUrl);
+    const path = url.pathname.replace(/^\/storage\/v1\/object\/public\//, '');
+    const parts = path.split('/');
+    return parts[parts.length - 1];
+};

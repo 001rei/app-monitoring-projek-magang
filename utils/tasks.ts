@@ -1,4 +1,4 @@
-import { ITask, ITaskWithOptions } from "@/types";
+import { ITask, ITaskAttachment, ITaskWithOptions } from "@/types";
 import { createClient } from "./supabase/client";
 import { DateUpdates } from "@/hooks/useTaskQueries";
 
@@ -25,7 +25,8 @@ export const tasks = {
                         endDate,
                         task_assignees (
                             users ( id, name, avatar, description )
-                        )
+                        ),
+                        task_attachments ( id, file_path, file_name, file_type )
                     `
                 )
                 .eq('project_id', projectId)
@@ -74,7 +75,8 @@ export const tasks = {
                         endDate,
                         task_assignees !inner (
                             users ( id, name, avatar, description )
-                        )
+                        ),
+                        task_attachments ( id, file_path, file_name, file_type )
                     `)
                 .eq('project_id', projectId)
                 .eq('task_assignees.user_id', userId);
@@ -185,6 +187,21 @@ export const tasks = {
             if (error) throw error;
             return data as ITask;
         },
+
+        uploadAttachment: async (data: Partial<ITaskAttachment>) => {
+            const { error } = await supabase
+                .from('task_attachments')
+                .insert(data)
+            if (error) throw error;
+        },
+
+        deleteAttachment: async (fileURL:string) => {
+            const { error } = await supabase
+                .from('task_attachments')
+                .delete()
+                .eq('file_path', fileURL)
+            if (error) throw error;
+        }
     },
 
     check: {
