@@ -188,10 +188,13 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
             );
         },
         sortingFn: (rowA, rowB, columnId) => {
-            console.log("Order A:", rowA.original.status?.order, "Order B:", rowB.original.status?.order);
-            const orderA = rowA.original.status?.order || Infinity; // Gunakan order dari status
-            const orderB = rowB.original.status?.order || Infinity; // Gunakan order dari status
-            return orderB - orderA;
+            const statusA = rowA.original.status;
+            const statusB = rowB.original.status;
+
+            if (statusA?.label === "Done" && statusB?.label !== "Done") return 1;
+            if (statusA?.label !== "Done" && statusB?.label === "Done") return -1;
+
+            return (statusA?.order || 0) - (statusB?.order || 0);
         },
     },
     {

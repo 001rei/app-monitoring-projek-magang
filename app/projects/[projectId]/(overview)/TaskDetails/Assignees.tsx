@@ -183,11 +183,9 @@ export const Assignees = () => {
     const handleAssignSelf = async () => {
         if (user?.id) {
             updateAssignees([user.id]);
-            await reloadProjectTasks();
-            await reloadAssignedTasks();
-
+            
             // Create self-assignment activity
-            await createActivities([
+            createActivities([
                 {
                     task_id: selectedTask?.id as string,
                     user_id: user.id,
@@ -202,6 +200,9 @@ export const Assignees = () => {
                 },
             ]);
             setSelectedAssignees([user.id]);
+            
+            await reloadProjectTasks();
+            await reloadAssignedTasks();
         }
     };
 
