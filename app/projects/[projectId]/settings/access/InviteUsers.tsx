@@ -128,7 +128,10 @@ export default function InviteUsers({
 
     return (
         <div className="py-8">
-            <h1 className="text-base mb-4">Invite users</h1>
+            <h1 className="text-lg font-medium">Invite users</h1>
+            <p className="text-xs text-muted-foreground pb-2">
+                Send invitations via email
+            </p>
             <div className="flex items-center gap-2">
                 <div className="relative ml-auto flex-1">
                     <User className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />

@@ -161,8 +161,10 @@ export default function ManageAccess({
 
     return (
         <div>
-            <h1 className="text-base mb-4">Manage Access</h1>
-
+            <h1 className="text-lg font-medium">Manage Access</h1>
+            <p className="text-xs text-muted-foreground">
+                Add, edit, or remove user access to this project
+            </p>
             <div className="rounded-md border overflow-hidden mt-4">
                 <div className="bg-muted dark:bg-muted/30 flex justify-between items-center px-4 py-2 border-b">
                     <div className="flex items-center gap-4">

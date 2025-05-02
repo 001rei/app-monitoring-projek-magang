@@ -37,11 +37,15 @@ export function AccessContainer({
     return (
         <>
             <Alert className="bg-muted/90 dark:bg-muted/60 border" >
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Project Visibility</AlertTitle>
-                <AlertDescription>
-                    Only those with access to this project can view it.
-                </AlertDescription>
+                <div className="flex space-x-3 items-center">
+                    <AlertCircle className="h-4 w-4 text-yellow-300" />
+                    <div>
+                        <AlertTitle>Project Visibility</AlertTitle>
+                        <AlertDescription>
+                            Only those with access to this project can view it.
+                        </AlertDescription>
+                    </div>
+                </div>
             </Alert>
             <InviteUsers 
                 projectName={projectName as string}

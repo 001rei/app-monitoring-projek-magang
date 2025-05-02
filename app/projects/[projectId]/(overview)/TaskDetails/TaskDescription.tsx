@@ -64,7 +64,7 @@ export const TaskDescription = () => {
                 </Button>
             </div>
 
-            <div className="p-2 min-h-[120px] max-w-3xl">
+            <div className="p-2 min-h-[120px]">
                 {editable ? (
                     <div>
                         <div className="min-h-[180px]">

@@ -140,8 +140,8 @@ export const TaskDetails = () => {
     );
 
     return (
-        <div className="flex flex-col lg:flex-row py-6 gap-6">
-            <div className="flex-grow">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_255px] gap-6 py-6">
+            <div className="min-w-0">
                 <p className="font-bold pb-2">Description</p>
                 <TaskDescription />
                 <div className="border-l pt-4 ml-8">

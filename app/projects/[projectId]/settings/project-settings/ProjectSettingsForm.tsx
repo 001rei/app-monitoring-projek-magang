@@ -57,7 +57,7 @@ export function ProjectSettingsForm({ project }: { project: IProject }) {
 
     return (
         <div className="space-y-8 w-full">
-            <Card className="border-0 shadow-sm">
+            <Card className="border-grey-100 dark:border-grey-900/50 bg-grey-50/50 dark:bg-grey-900/10">
                 <CardHeader>
                     <CardTitle className="text-lg font-medium">Project Information</CardTitle>
                     <CardDescription className="text-sm">

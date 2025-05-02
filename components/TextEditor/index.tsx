@@ -109,7 +109,7 @@ const TextEditor = ({
     }, [isEditable]);
 
     return (
-        <div className="w-full">
+        <div className="w-full max-width-3xl">
             <div>
                 {isEditable && (
                     <div className="bg-slate-100 dark:bg-gray-900 overflow-x-auto border rounded-t-sm">
