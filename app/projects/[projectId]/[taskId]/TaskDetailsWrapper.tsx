@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { SingleTaskDetails } from './TaskDetails';
 import { toast } from '@/hooks/use-toast';
 import { ITaskWithOptions } from '@/types';
-import { TaskDetailsProvider } from '../(overview)/TaskDetailsContext';
+import { TaskDetailsProvider } from '../phase-activities/TaskDetailsContext';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAssignedTasksQueries } from '@/hooks/useAssignedTasksQueries';
 

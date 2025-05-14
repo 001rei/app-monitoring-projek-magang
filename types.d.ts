@@ -1,3 +1,4 @@
+import { tasks } from './utils/tasks';
 type userProvider = "email" | "github" | "google";
 type Role = 'read' | 'write' | 'admin' | 'owner';
 type InvitationStatus = 'invited' | 'accepted' | 'declined' | 'expired';
@@ -49,20 +50,20 @@ export interface IPhase {
 }
 
 export interface IStatus {
-    id: string;
-    project_id?: string;
+    id: number;
     label: string;
     color: string;
     description: string;
+    order: number;
     created_at: Date;
-    updated_at: Date;
 }
 
 export interface IPriority {
     id: string;
-    project_id?: string;
     label: string;
     color: string;
+    description: string;
+    order: number;
     created_at: Date;
 }
 
@@ -80,9 +81,9 @@ interface ITask {
     project_id: string;
     phase_id: string;
     phase_label: string;
-    parent_task_id: string | null; // ➜ Menentukan apakah ini subtask atau task utama
+    parent_task_id: string | null; 
 
-    status: string | null;
+    status: number;
     priority: string | null;
     milestone: string | null;
     title: string;
@@ -133,7 +134,7 @@ type ActivityType = 'status' | 'priority' | 'date' | 'user' | 'users';
 type ActivityPayload = 'id' | 'value' | 'ids';
 
 type ActivityObject =
-    | { type: 'status'; id: string }
+    | { type: 'status'; id: number }
     | { type: 'priority'; id: string }
     | { type: 'date'; value: string }
     | { type: 'user'; id: string }
@@ -180,7 +181,7 @@ interface ICustomFieldTask {
     title: string;
     phase_label: string;
     description?: string;
-    status: string;
+    status: number;
     priority: string;
 }
 
@@ -202,7 +203,7 @@ interface ITaskWithOptions extends Partial<ITask> {
         description: string;
     };
     status?: {
-        id: string;
+        id: number;
         label: string;
         color: string;
         order: number;
@@ -250,6 +251,27 @@ interface MemberWithUser extends IProjectMember {
     user: Pick<IUser, 'id' | 'name' | 'email' | 'avatar'>;
 }
 
+interface IOverviewWithOption extends Partial<IProject> {
+    membersCount: number;
+    currentPhase: Partial<IPhase>;
+    phases: Partial<IPhase>[];
+    tasks: {
+        id: string;
+        title: string;
+        status: Partial<IStatus>;
+        priority: Partial<IPriority>;
+        endDate: Date;
+        created_at: Date;
+        updated_at: Date;
+        assignees?: {
+            id: string;
+            name: string;
+            description: string;
+            avatar: string;
+        }[];
+    }[];
+}
+
 type BoardProject = {
     id: string;
     label: string;
@@ -264,3 +286,21 @@ type BoardProject = {
         done_tasks: number;
     } | null;
 };
+
+type OverviewTask = {
+    id: string;
+    phase_id: string;
+    task_status?: {
+        id: number;
+        label: string;
+        color: string;
+        order: number;
+    } | null;
+    task_priority?: {
+        id: string;
+        label: string;
+        color: string;
+        order: number;
+    } | null;
+    endDate?: Date;
+}

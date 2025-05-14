@@ -88,7 +88,7 @@ export const useProjectQueries = (projectId: string, taskId?: string, phaseLabel
 
     // Update task status on table
     const { mutate: updateStatusOnTable } = useMutation({
-        mutationFn: (statusId: string | null) =>
+        mutationFn: (statusId: number | undefined) =>
             tasks.details.update(taskId as string, { status: statusId,  }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['project-tasks', taskId] });

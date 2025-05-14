@@ -14,26 +14,34 @@ import { createClient } from '@/utils/supabase/client';
 import { TaskActivity } from '@/types';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useActivityQueries } from '@/hooks/useActivityQueries';
+import { useOverviewQueries } from '@/hooks/useOverviewQueries';
+import { useBoardQueries } from '@/hooks/useBoardQueries';
 
 
 export const OtherActions = () => {
     const { projectId } = useParams();
-    const { selectedTask, closeDrawer, updateTaskStatus } = useTaskDetails();
-    const { deleteTask, updateStatus } = useTaskQueries(selectedTask?.id || '');
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDone, setIsDone] = useState(false);
     const [isDialogDeleteOpen, setIsDialogDeleteOpen] = useState(false);
     const [isDialogDoneOpen, setIsDialogDoneOpen] = useState(false);
+    
+    const { user } = useCurrentUser();
+    const { selectedTask, closeDrawer, updateTaskStatus } = useTaskDetails();
+    const { deleteTask, updateStatus } = useTaskQueries(selectedTask?.id || '');
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
     const { updateStatusOnTable } = useProjectQueries(projectId as string || "", selectedTask?.id as string);
     const { createActivities } = useActivityQueries(selectedTask?.id || '');
-    const { user } = useCurrentUser();
+    const { reloadOverview } = useOverviewQueries(projectId as string, selectedTask?.phase_id?.id as string);
+    const { reloadBoard } = useBoardQueries(user?.id as string);
 
     const handleDelete = async () => {
         try {
             setIsDeleting(true);
-            await deleteTask();
+            deleteTask();
             await reloadProjectTasks();
+            await reloadOverview();
+            await reloadBoard();
+
             closeDrawer();
 
             toast({
@@ -55,15 +63,15 @@ export const OtherActions = () => {
     };
 
     const handleDone = async () => {
-        const newStatus = "921614a8-4417-4fb9-acb0-cf1536b28e1a";
-        const oldStatus = selectedTask?.status?.id as string;
+        const newStatus = 8;
+        const oldStatus = selectedTask?.status?.id as number;
 
         try {
             setIsDone(true);
             const supabase = createClient();
 
-            await updateStatus(newStatus || null);
-            await updateStatusOnTable(newStatus || null);
+            updateStatus(newStatus || null);
+            updateStatusOnTable(newStatus || null);
             await supabase
                 .from("tasks")
                 .update({ status: newStatus, updated_at: new Date() })
@@ -94,6 +102,8 @@ export const OtherActions = () => {
             }
 
             await reloadProjectTasks();
+            await reloadOverview();
+            await reloadBoard();
 
             toast({
                 title: 'Success',

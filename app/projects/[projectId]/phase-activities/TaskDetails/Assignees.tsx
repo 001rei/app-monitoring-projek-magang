@@ -23,6 +23,7 @@ import { useActivityQueries } from '@/hooks/useActivityQueries';
 import { useProjectOwner } from '@/hooks/useProjectOwner';
 import { TaskActivity } from '@/types';
 import { useAssignedTasksQueries } from '@/hooks/useAssignedTasksQueries';
+import { toast } from '@/hooks/use-toast';
 
 export const Assignees = () => {
     const params = useParams();
@@ -41,6 +42,7 @@ export const Assignees = () => {
     const [filter, setFilter] = useState('');
     const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Initialize selected assignees when task loads or changes
     useEffect(() => {
@@ -182,27 +184,39 @@ export const Assignees = () => {
 
     const handleAssignSelf = async () => {
         if (user?.id) {
-            updateAssignees([user.id]);
+            try {
+                setIsLoading(true);
+                updateAssignees([user.id]);
+                await reloadProjectTasks();
+
+                createActivities([
+                    {
+                        task_id: selectedTask?.id as string,
+                        user_id: user.id,
+                        content: [
+                            {
+                                type: 'user',
+                                id: user.id,
+                            },
+                            'self-assigned this on',
+                            { type: 'date', value: new Date().toISOString() },
+                        ],
+                    },
+                ]);
+                setSelectedAssignees([user.id]);
+
+                await reloadAssignedTasks();
+            } catch (error) {
+                console.error('Error self-assign: ', error);
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: 'Error to self-assign, please try again'
+                })
+            } finally {
+                setIsLoading(false);
+            }
             
-            // Create self-assignment activity
-            createActivities([
-                {
-                    task_id: selectedTask?.id as string,
-                    user_id: user.id,
-                    content: [
-                        {
-                            type: 'user',
-                            id: user.id,
-                        },
-                        'self-assigned this on',
-                        { type: 'date', value: new Date().toISOString() },
-                    ],
-                },
-            ]);
-            setSelectedAssignees([user.id]);
-            
-            await reloadProjectTasks();
-            await reloadAssignedTasks();
         }
     };
 
@@ -270,6 +284,7 @@ export const Assignees = () => {
                         <Button
                             onClick={handleAssignSelf}
                             className="px-1 text-blue-500 bg-transparent text-xs h-4 font-normal hover:bg-transparent"
+                            disabled={isLoading}
                         >
                             Assign yourself
                         </Button>

@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input"
 import AddTaskDialog from "./AddTaskDialog"
 import PhaseDatePicker from "./PhaseDatePicker"
-import { CalendarDays, CheckCircle } from "lucide-react"
+import { CalendarDays, CheckCircle, ClipboardListIcon } from "lucide-react"
 import { PhaseAction } from "./PhaseAction"
 
 interface DataTableProps<TData, TValue> {
@@ -31,7 +31,7 @@ interface DataTableProps<TData, TValue> {
 
 export function DataTable<TData, TValue>({ columns, data, phaseLabel, phaseId, phaseOrder, phaseStatus }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([
-        { id: "status", desc: false } 
+        { id: "status", desc: false }
     ]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -156,8 +156,12 @@ export function DataTable<TData, TValue>({ columns, data, phaseLabel, phaseId, p
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    No tasks found.
+                                    <TableCell colSpan={columns.length} className="py-12">
+                                    <div className="flex flex-col items-center justify-center space-y-2">
+                                            <ClipboardListIcon className="h-7 w-7 text-gray-400" />
+                                        <p className="text-base font-medium text-gray-500">No tasks found</p>
+                                        <p className="text-sm text-gray-400">Create a new task to get started</p>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         )}

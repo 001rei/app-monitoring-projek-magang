@@ -7,7 +7,7 @@ export const useBoardQueries = (userId: string) => {
     // Fetch projects
     const { data: boardProjects, isLoading, refetch: refetchBoard } = useQuery({
         queryKey: ['board-projects', userId],
-        queryFn: () => board.getProjects(),
+        queryFn: () => board.getProjects(userId),
         enabled: !!userId,
         staleTime: Infinity,
         gcTime: 1000 * 60 * 30,

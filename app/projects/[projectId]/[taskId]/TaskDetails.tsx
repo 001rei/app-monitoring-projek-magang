@@ -3,9 +3,9 @@ import { Separator } from '@/components/ui/separator';
 import { UserCard } from '@/components/UserCard';
 import { useEffect } from 'react';
 import { ITaskWithOptions } from '@/types';
-import { TaskDetails } from '../(overview)/TaskDetails';
-import { HeaderSection } from '../(overview)/TaskDetails/HeaderSection';
-import { useTaskDetails } from '../(overview)/TaskDetailsContext';
+import { TaskDetails } from '../phase-activities/TaskDetails';
+import { HeaderSection } from '../phase-activities/TaskDetails/HeaderSection';
+import { useTaskDetails } from '../phase-activities/TaskDetailsContext';
 
 export const SingleTaskDetails = ({ task }: { task: ITaskWithOptions }) => {
     const { setSelectedTask } = useTaskDetails();

@@ -20,6 +20,7 @@ import { DateRange } from "react-day-picker";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useBoardQueries } from "@/hooks/useBoardQueries";
 import { cn } from "@/lib/utils";
+import { useOverviewQueries } from "@/hooks/useOverviewQueries";
 
 interface AddTaskFromProps {
     statuses?: IStatus[];
@@ -35,22 +36,37 @@ interface AddTaskFromProps {
 export default function AddTaskForm({ statuses, priorities, milestones, onSuccess, phaseId, phaseLabel, taskId, isPhaseDone }: AddTaskFromProps) {
     const params = useParams();
     const projectId = params.projectId;
+    console.log(statuses);
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [status, setStatus] = useState("");
+    const [status, setStatus] = useState<number>();
     const [priority, setPriority] = useState("");
     const [milestone, setMilestone] = useState("");
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
     const [isCreating, setIsCreating] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
     const { user } = useCurrentUser();
+    const { reloadOverview } = useOverviewQueries(projectId as string, phaseId);
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
     const { reloadBoard } = useBoardQueries(user?.id as string);
 
     const filteredMilestones = useMemo(() => {
-        return milestones?.filter(milestone => milestone.phase_label === phaseLabel) || [];
+        return milestones?.filter(milestone => milestone.phase_label === phaseLabel)
+            .sort((a, b) => a.milestone_order - b.milestone_order) || [];
     }, [milestones, phaseLabel]);
+
+    const filteredStatuses = useMemo(() => {
+        return statuses?.filter(status => status.label !== 'Overdue' && status.label !== 'Done')
+            .sort((a, b) => a.order - b.order) || [];
+    }, [statuses]);
+
+    console.log(filteredStatuses)
+
+    const sortedPriorities = useMemo(() => {
+        return priorities?.sort((a ,b) => a.order - b.order) || [];
+    }, [priorities]);
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -90,7 +106,7 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
                 project_id: projectId as string,
                 title,
                 description,
-                status: status || null,
+                status: status || undefined,
                 priority: priority || null,
                 milestone: milestone || null,
                 startDate: dateRange?.from,
@@ -101,6 +117,7 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
 
             await tasks.details.create(taskData);
             await reloadProjectTasks();
+            await reloadOverview();
             await reloadBoard();
 
             toast({
@@ -116,7 +133,7 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
             // Reset form
             setTitle("");
             setDescription("");
-            setStatus("");
+            setStatus(undefined);
             setPriority("");
             setMilestone("");
             setDateRange(undefined);
@@ -191,13 +208,19 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
-                    <Select value={status} onValueChange={setStatus}>
+                    <Select
+                        value={status?.toString()} 
+                        onValueChange={(value) => setStatus(Number(value))} 
+                    >
                         <SelectTrigger>
                             <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                            {statuses?.map((status) => (
-                                <SelectItem key={status.id} value={status.id}>
+                            {filteredStatuses?.map((status) => (
+                                <SelectItem
+                                    key={status.id}
+                                    value={status.id.toString()} 
+                                >
                                     {status.label}
                                 </SelectItem>
                             ))}
@@ -212,7 +235,7 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
                             <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                         <SelectContent>
-                            {priorities?.map((priority) => (
+                            {sortedPriorities?.map((priority) => (
                                 <SelectItem key={priority.id} value={priority.id}>
                                     {priority.label}
                                 </SelectItem>

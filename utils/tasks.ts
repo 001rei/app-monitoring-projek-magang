@@ -1,6 +1,7 @@
 import { ITask, ITaskAttachment, ITaskWithOptions } from "@/types";
 import { createClient } from "./supabase/client";
 import { DateUpdates } from "@/hooks/useTaskQueries";
+import { error } from "console";
 
 const supabase = createClient();
 
@@ -38,8 +39,18 @@ export const tasks = {
             })) as any[];
         },
 
+        getCurrentPhase: async (projectId:string) => {
+            const { data, error } = await supabase
+                .from('phases')
+                .select(`id`)
+                .eq('project_id', projectId)
+                .eq('status', 1)
+                .single();
+            if (error) throw error;
+            return data; 
+        },
+
         getProjectPhase: async (projectId: string, phaseLabel: string) => {
-            console.log(phaseLabel, "cokk")
             const { data, error } = await supabase
                 .from('phases')
                 .select('*')
@@ -121,7 +132,6 @@ export const tasks = {
         },
 
         create: async (task: Partial<ITask>) => {
-            // console.log(task);
             const { error } = await supabase
                 .from('tasks')
                 .insert(task)
@@ -206,7 +216,7 @@ export const tasks = {
 
     check: {
         isAllTasksDone: async (projectId: string, phaseLabel: string) => {
-            const DONE_STATUS_ID = '921614a8-4417-4fb9-acb0-cf1536b28e1a';
+            const DONE_STATUS_ID = 8;
 
             try {
                 const { data: tasks, error: tasksError } = await supabase

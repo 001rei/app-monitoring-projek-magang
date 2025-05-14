@@ -3,52 +3,74 @@ import { createClient } from "./supabase/client";
 const supabase = await createClient();
 
 export const board = {
-    getProjects: async () => {
-        const DONE_STATUS_ID = '921614a8-4417-4fb9-acb0-cf1536b28e1a';
+    getProjects: async (userId: string) => {
+        const DONE_STATUS_ID = 8;
 
-        const { data: phases, error } = await supabase
-            .from('phases')
+        const { data: ownedProjects } = await supabase
+            .from('projects')
+            .select('id')
+            .eq('created_by', userId);
+
+        const { data: memberProjects } = await supabase
+            .from('project_members')
+            .select('project_id')
+            .eq('user_id', userId);
+
+        const ownedProjectIds = ownedProjects?.map(p => p.id) || [];
+        const memberProjectIds = memberProjects?.map(p => p.project_id) || [];
+
+        const accessibleProjectIds = [...new Set([...ownedProjectIds, ...memberProjectIds])];
+        if (accessibleProjectIds.length === 0) return [];
+
+        const { data: projects, error } = await supabase
+            .from('projects')
             .select(`
                 id,
-                label,
-                endDate,
-                details: project_id (
+                name,
+                description,
+                category,
+                project_code,
+                created_by,
+                phases:phases!inner(
                     id,
-                    name,
-                    description,
-                    category,
-                    project_code
-                ),
-                tasks: tasks!inner (
-                    id,
-                    status
+                    label,
+                    endDate,
+                    status,
+                    tasks:tasks!inner(
+                        id,
+                        status
+                    )
                 )
             `)
-            .eq('status', 1);
+            .in('id', accessibleProjectIds)
+            .eq('phases.status', 1);
 
         if (error) throw error;
+        if (!projects) return [];
 
-        const result = phases.map((phase: any) => {
-            const total_tasks = phase.tasks.length;
-            const done_tasks = phase.tasks.filter((task: any) => task.status === DONE_STATUS_ID).length;
+        const result = projects.flatMap(project => {
+            return project.phases.map(phase => {
+                const total_tasks = phase.tasks.length;
+                const done_tasks = phase.tasks.filter(task => task.status === DONE_STATUS_ID).length;
 
-            return {
-                id: phase.id,
-                label: phase.label,
-                endDate: phase.endDate,
-                details: phase.details ? {
-                    id: phase.details.id,
-                    name: phase.details.name,
-                    description: phase.details.description,
-                    category: phase.details.category,
-                    project_code: phase.details.project_code,
-                    total_tasks: total_tasks,
-                    done_tasks: done_tasks
-                } : null
-            };
+                return {
+                    id: phase.id,
+                    label: phase.label,
+                    endDate: phase.endDate,
+                    details: {
+                        id: project.id,
+                        name: project.name,
+                        description: project.description,
+                        category: project.category,
+                        project_code: project.project_code,
+                        created_by: project.created_by,
+                        total_tasks,
+                        done_tasks
+                    }
+                };
+            });
         });
 
-        console.log('Success reload board');
         return result;
     }
 }

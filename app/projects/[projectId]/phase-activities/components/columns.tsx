@@ -15,6 +15,10 @@ import { useProjectQueries } from "@/hooks/useProjectQueries"
 import { createClient } from "@/utils/supabase/client"
 import { TaskDoneConfirmationDialog } from "./TaskDoneConfirmationDialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useOverviewQueries } from "@/hooks/useOverviewQueries"
+import { format } from "date-fns"
+import { useBoardQueries } from "@/hooks/useBoardQueries"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
 
 export const columns: ColumnDef<ITaskWithOptions>[] = [
     {
@@ -28,26 +32,34 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
             const [isChecked, setIsChecked] = useState(row.original.status?.label === "Done");
 
             const task = row.original;
+            const { user } = useCurrentUser();
             const { updateStatusOnTable } = useProjectQueries(projectId as string || "", task.id);
             const { reloadProjectTasks } = useProjectQueries(projectId as string || "");
+            const { reloadOverview } = useOverviewQueries(projectId as string, task.phase_id?.id as string)
+            const { reloadBoard } = useBoardQueries(user?.id as string);
+
 
             const handleStatusChange = useCallback(
                 async (value: boolean) => {
                     const newStatus = value
-                        ? "921614a8-4417-4fb9-acb0-cf1536b28e1a"
-                        : "33529e8d-3041-4b1f-98d4-848ac85323b4";
+                        ? 8
+                        : 3;
 
                     try {
                         setIsLoading(true);
-                        await updateStatusOnTable(newStatus || null);
+
+                        updateStatusOnTable(newStatus || 0);
                         await supabase
                             .from("tasks")
                             .update({ status: newStatus, updated_at: new Date() })
                             .eq("parent_task_id", task.id);
 
                         await reloadProjectTasks();
+                        await reloadOverview();
+                        await reloadBoard();
+
                         row.toggleSelected(!!value);
-                        setIsChecked(true); 
+                        setIsChecked(true);
                     } catch (error) {
                         console.error("Gagal mengubah status:", error);
                     } finally {
@@ -59,17 +71,17 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
 
             const handleCheckboxClick = () => {
                 if (!isChecked) {
-                    setIsDialogOpen(true); 
+                    setIsDialogOpen(true);
                 }
             };
 
             const handleConfirm = () => {
-                handleStatusChange(true); 
-                setIsDialogOpen(false); 
+                handleStatusChange(true);
+                setIsDialogOpen(false);
             };
 
             const handleCancel = () => {
-                setIsDialogOpen(false); 
+                setIsDialogOpen(false);
             };
 
             return (
@@ -130,7 +142,7 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
         header: ({ column }) => {
             return (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Title
+                    Task
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
@@ -152,10 +164,10 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
 
                     <span
                         className={`flex-1 truncate ${currentStatus.label === "Done"
-                                ? "line-through text-muted-foreground"
-                                : "text-foreground"
+                            ? "line-through text-muted-foreground"
+                            : "text-foreground"
                             }`}
-                        title={task.title} 
+                        title={task.title}
                     >
                         {task.title}
                     </span>
@@ -191,10 +203,13 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
             const statusA = rowA.original.status;
             const statusB = rowB.original.status;
 
-            if (statusA?.label === "Done" && statusB?.label !== "Done") return 1;
-            if (statusA?.label !== "Done" && statusB?.label === "Done") return -1;
+            if (statusA?.label === "Done" && statusB?.label === "Done") return 0;
+            if (statusA?.label === "Done") return 1;
+            if (statusB?.label === "Done") return -1;
 
-            return (statusA?.order || 0) - (statusB?.order || 0);
+            const orderA = statusA?.order;
+            const orderB = statusB?.order;
+            return (orderA as number) - (orderB as number);
         },
     },
     {
@@ -209,15 +224,15 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
         },
         cell: ({ row }) => {
             const priority = row.original.priority;
-            
+
             return priority ? (
                 <div className="pl-3">
                     <CustomFieldTagRenderer
-                    color={priority.color as string}
-                    label={priority.label as string}
-                />
+                        color={priority.color as string}
+                        label={priority.label as string}
+                    />
                 </div>
-                
+
             ) : (
                 <p className="text-gray-500/75 pl-5">None</p>
             );
@@ -225,7 +240,7 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
         sortingFn: (rowA, rowB, columnId) => {
             const orderA = rowA.original.priority?.order || Infinity;
             const orderB = rowB.original.priority?.order || Infinity;
-            return orderB - orderA; 
+            return orderB - orderA;
         },
 
     },
@@ -240,7 +255,7 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
             return (
                 <>
                     {assignees && assignees.length > 0 ? (
-                        <StackedAvatars users={assignees}  />
+                        <StackedAvatars users={assignees} />
                     ) : (
                         <p className="text-gray-500/75">No Assignees</p>
                     )}
@@ -261,14 +276,19 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
         cell: ({ row }) => {
             const task = row.original;
             const currentStatus = task.status || { id: "unknown", label: "Unknown", color: "gray" };
-            const endDate = task.endDate ? new Date(task.endDate).toLocaleDateString() : <p className="text-gray-500/75">No Due Date</p>; 
+
+            const formattedDate = task.endDate
+                ? format(new Date(task.endDate), 'PPP')
+                : "No Due Date";
 
             return (
                 <div className={currentStatus.label === "Done" ? "line-through text-muted-foreground ml-5" : "ml-5"}>
-                    {endDate}
+                    <span className={task.endDate ? "" : "text-gray-500/75"}>
+                        {formattedDate}
+                    </span>
                 </div>
             );
-        },
+        }
     },
     {
         id: "actions",

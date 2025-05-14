@@ -27,6 +27,7 @@ import {
 
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
+import { InboxIcon } from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -110,14 +111,16 @@ export function DataTable<TData, TValue>({
                 </TableRow> 
               ))
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No task assigned to you yet.
-                </TableCell>
-              </TableRow>
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="py-12">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="p-3 rounded-full">
+                        <InboxIcon className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-500">No task assigned to you yet</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
             )}
           </TableBody>
         </Table>

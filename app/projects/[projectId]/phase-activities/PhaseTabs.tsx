@@ -66,8 +66,13 @@ export default function PhaseTabs({ projectId }: Props) {
             }));
     }, [allPhase, tasksByPhase]);
 
+    const defaultPhase = useMemo(() => {
+        const activePhase = phases.find(phase => phase.status === 1);
+        return activePhase?.value || 'perencanaan'; 
+    }, [phases]);
+
     return (
-        <Tabs defaultValue="perencanaan">
+        <Tabs defaultValue={defaultPhase}>
             <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-10 md:mb-6">
                 {phases.map(phase => {
                     const isPhaseEnabled = phase.status === 1 || phase.status === 2;

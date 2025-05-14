@@ -12,7 +12,7 @@ interface TaskDetailsContextType {
     updateTaskDescription?: (taskId: string, description: string) => void;
     updateTaskStatus?: (
         taskId: string,
-        status: { id: string; label: string; color: string; 'order': number; } | undefined
+        status: { id: number; label: string; color: string; 'order': number; } | undefined
     ) => void;
     updateTaskPriority?: (
         taskId: string,
@@ -76,7 +76,7 @@ export function TaskDetailsProvider({
 
     const updateTaskStatus = (
         taskId: string,
-        status: { id: string; label: string; color: string; 'order': number;} | undefined
+        status: { id: number; label: string; color: string; 'order': number;} | undefined
     ) => {
         setSelectedTask((prev) =>
             prev?.id === taskId ? { ...prev, status: status || undefined } : prev

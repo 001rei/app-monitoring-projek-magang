@@ -6,12 +6,13 @@ import { ITaskWithOptions } from "@/types"
 import { CustomFieldTagRenderer } from "@/components/CustomFieldTagRenderer"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { format } from "date-fns"
 
 export const columns: ColumnDef<ITaskWithOptions>[] = [
   {
     accessorKey: "title",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Title" className="ps-[15px]"/>
+      <DataTableColumnHeader column={column} title="Task" className="ps-[15px]"/>
     ),
     cell: ({ row }) => {
       const params = useParams();
@@ -109,7 +110,7 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
     ),
     cell: ({ row }) => {
       const task = row.original;
-      const endDate = task.endDate ? new Date(task.endDate).toLocaleDateString() : <p className="text-gray-500/75">No Due Date</p>; 
+      const endDate = task.endDate ? format(new Date(task.endDate), 'PPP') : <p className="text-gray-500/75">No Due Date</p>; 
 
       return endDate;
     },

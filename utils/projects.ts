@@ -1,4 +1,4 @@
-import { IProject, IUser, ProjectWithOptions } from "@/types";
+import { IOverviewWithOption, IProject, IUser, ProjectWithOptions } from "@/types";
 import { createClient } from "./supabase/client";
 import generateProjectCode from "./code-project-generator";
 
@@ -60,8 +60,8 @@ export const projects = {
                 if (projectData.phases) {
                     const { data, error: phaseError } = await supabase
                         .from('phases')
-                        .insert(    
-                            projectData.phases.map(( phase ) => ({
+                        .insert(
+                            projectData.phases.map((phase) => ({
                                 ...phase,
                                 project_id: project.id,
                             }))
@@ -106,7 +106,7 @@ export const projects = {
             if (error) throw error;
             return data;
         },
-        
+
         getMilestones: async () => {
             const { data, error } = await supabase
                 .from('milestones')
@@ -116,7 +116,6 @@ export const projects = {
         }
     },
 
-    // Project members
     members: {
         getAll: async (projectId: string) => {
             const { data, error } = await supabase
@@ -201,5 +200,72 @@ export const projects = {
 
         return allProjects as IProject[];
     },
+
+    getOverviewData: async (projectId: string, phaseId: string) => {
+        const { data: project, error: projectError } = await supabase
+            .from('projects')
+            .select(`
+            id,
+            name,
+            project_code,
+            phases (id, label, startDate, endDate, actualEndDate, status, phase_order),
+            project_members (id)
+        `)
+            .eq('id', projectId)
+            .single();
+        if (projectError) throw projectError;
+
+        const { data: tasks, error: taskError } = await supabase
+            .from('tasks')
+            .select(`
+            id,
+            title,
+            status (id, label, color, "order"),
+            priority (id, label, color, "order"),
+            endDate,
+            updated_at,
+            assignees:task_assignees (
+                users ( id, name, avatar, description )
+            ),
+            created_at
+        `)
+            .eq('project_id', projectId)
+            .eq('phase_id', phaseId);
+        if (taskError) throw taskError;
+
+        const sortedPhases = project.phases
+            .sort((a, b) => a.phase_order - b.phase_order)
+            .map(phase => ({
+                id: phase.id,
+                label: phase.label,
+                status: phase.status,
+                startDate: phase.startDate,
+                endDate: phase.endDate,
+                actualEndDate: phase.actualEndDate
+            }));
+
+        const currentPhase = sortedPhases.find(phase => phase.status === 1);
+
+        const transformedTasks = tasks.map(task => ({
+            ...task,
+            assignees: task.assignees?.map(assignment => assignment.users)?.flat() || []
+        }));
+
+        return {
+            id: project.id,
+            name: project.name,
+            project_code: project.project_code,
+            membersCount: project.project_members.length + 1,
+            currentPhase: currentPhase ? {
+                label: currentPhase.label,
+                id: currentPhase.id,
+                startDate: currentPhase.startDate,
+                endDate: currentPhase.endDate,
+                actualEndDate: currentPhase.actualEndDate
+            } : null,
+            phases: sortedPhases,
+            tasks: transformedTasks
+        } as IOverviewWithOption;
+    }
 
 }

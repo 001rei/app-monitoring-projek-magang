@@ -52,7 +52,7 @@ export const useTaskQueries = (taskId: string) => {
 
     // Update task status
     const { mutate: updateStatus } = useMutation({
-        mutationFn: (statusId: string | null) =>
+        mutationFn: (statusId: number | undefined) =>
             tasks.details.update(taskId, { status: statusId }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['task', taskId] });

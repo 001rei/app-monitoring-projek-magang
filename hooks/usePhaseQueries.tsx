@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 export const usePhaseQueries = (projectId: string, phaseLabel: string) => {
     const queryClient = useQueryClient();
 
-    // Fetch project phase details
     const { data: phase, refetch: refetchPhase } = useQuery({
         queryKey: ['project-phase', projectId],
         queryFn: () => tasks.table.getProjectPhase(projectId, phaseLabel),
@@ -35,10 +34,27 @@ export const usePhaseQueries = (projectId: string, phaseLabel: string) => {
         return refetchAllPhase();
     };
 
+    const { data: currentPhase, refetch: refetchCurrentPhase } = useQuery({
+        queryKey: ['current-phase', projectId],
+        queryFn: () => tasks.table.getCurrentPhase(projectId),
+        enabled: !!projectId,
+        staleTime: Infinity,
+        gcTime: 1000 * 60 * 30,
+    });
+
+    const reloadCurrentPhase = async () => {
+        await queryClient.invalidateQueries({
+            queryKey: ['current-phase', projectId],
+        });
+        return refetchCurrentPhase();
+    };
+
     return {
         phase,
-        reloadPhase,
         allPhase,
+        currentPhase,
+        reloadPhase,
         reloadAllPhase,
+        reloadCurrentPhase
     }
 }

@@ -34,8 +34,6 @@ export default function Board({ userId }: Props) {
         "PIR",
     ];
 
-    console.log(boardProjects)
-
     const filteredAndSearchedProjects = useMemo(() => {
         if (!boardProjects) return [];
         return boardProjects.filter(project => {

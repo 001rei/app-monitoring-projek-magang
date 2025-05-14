@@ -22,6 +22,10 @@ export function DynamicBreadcrumb({ projectId, projectName }: DynamicBreadcrumbP
 
     if (pathname === `/projects/${projectId}`) {
         breadcrumbItems = [
+            { label: "Overview" },
+        ];
+    } else if (pathname === `/projects/${projectId}/phase-activities`) {
+        breadcrumbItems = [
             { label: "Phase Activities" },
         ];
     } else if (pathname === `/projects/${projectId}/settings/project-settings`) {

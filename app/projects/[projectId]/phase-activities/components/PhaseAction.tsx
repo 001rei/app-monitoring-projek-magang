@@ -29,6 +29,7 @@ import { tasks } from "@/utils/tasks";
 import { successButton } from "@/consts/buttonStyles";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useBoardQueries } from "@/hooks/useBoardQueries";
+import { useOverviewQueries } from "@/hooks/useOverviewQueries";
 
 interface Props {
     phaseId: string;
@@ -44,7 +45,8 @@ export function PhaseAction({ phaseId, phaseOrder, phaseLabel, phaseStatus }: Pr
 
     const { user } = useCurrentUser();
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
-    const { reloadAllPhase } = usePhaseQueries(projectId as string, '');
+    const { reloadOverview } = useOverviewQueries(projectId as string, phaseId);
+    const { reloadAllPhase, reloadCurrentPhase } = usePhaseQueries(projectId as string, '');
     const { reloadBoard } = useBoardQueries(user?.id as string);
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -89,7 +91,9 @@ export function PhaseAction({ phaseId, phaseOrder, phaseLabel, phaseStatus }: Pr
                 .eq('phase_order', phaseOrder + 1);
             
             await reloadAllPhase();
+            await reloadCurrentPhase();
             await reloadProjectTasks();
+            await reloadOverview();
             await reloadBoard();
 
             toast({

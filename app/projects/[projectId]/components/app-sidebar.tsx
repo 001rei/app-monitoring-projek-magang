@@ -5,7 +5,8 @@ import {
     Command,
     Settings2,
     ListTodo,
-    ClipboardList
+    ClipboardList,
+    BarChart3
 } from "lucide-react"
 
 import { NavMain } from "./nav-main"
@@ -33,8 +34,14 @@ export function AppSidebar({ projectId, projectName, projectCode, user, ...props
 
     const navMain = React.useMemo(() => [
         {
-            title: "Phase Activities",
+            title: "Overview",
             url: `/projects/${projectId}`,
+            icon: BarChart3,
+            isActive: true,
+        },
+        {
+            title: "Phase Activities",
+            url: `/projects/${projectId}/phase-activities`,
             icon: ListTodo,
             isActive: true,
         },

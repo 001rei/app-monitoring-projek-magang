@@ -6,7 +6,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
 import { createClient } from "@/utils/supabase/client";
 import { successButton } from "@/consts/buttonStyles";
 import { cn } from "@/lib/utils";
@@ -15,6 +14,7 @@ import { useProjectQueries } from "@/hooks/useProjectQueries";
 import { useParams } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useBoardQueries } from "@/hooks/useBoardQueries";
+import { useOverviewQueries } from "@/hooks/useOverviewQueries";
 
 interface Props {
     phaseId: string;
@@ -26,10 +26,11 @@ export default function PhaseDatePicker({ phaseId, phaseStatus }: Props) {
     const projectId = params.projectId;
     const isPhaseDone = phaseStatus === 2;
 
+    const { user } = useCurrentUser();
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isLoading, setIsLoading] = useState(false);
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
-    const { user } = useCurrentUser();
+    const { reloadOverview } = useOverviewQueries(projectId as string, phaseId);
     const { reloadBoard } = useBoardQueries(user?.id as string)
 
     const isDateDisabled = (date: Date) => {
@@ -74,7 +75,9 @@ export default function PhaseDatePicker({ phaseId, phaseStatus }: Props) {
                     endDate: dateRange.to,   
                 })
                 .eq("id", phaseId); 
+
             await reloadProjectTasks();
+            await reloadOverview();
             await reloadBoard();
 
             if (error) {

@@ -130,7 +130,7 @@ export const Project = () => {
         }
     };
 
-    const handleStatusSelect = async (statusId: string | null) => {
+    const handleStatusSelect = async (statusId: number | null) => {
         if (!selectedTask?.id) return;
 
         const newStatus = statusId
@@ -144,7 +144,7 @@ export const Project = () => {
         }
 
         try {
-            await updateStatus(statusId || null);
+            updateStatus(statusId || undefined);
             updateTaskStatus?.(selectedTask.id, newStatus);
 
             const activities: {
@@ -197,6 +197,7 @@ export const Project = () => {
                 await createActivities(activities);
             }
         } catch (error) {
+            console.error('Error selecting status: ', error);
             toast({
                 title: 'Failed to update status',
                 variant: 'destructive',
