@@ -39,13 +39,14 @@ interface IProjectMember {
 
 export interface IPhase {
     id: string;
-    project_id?: string;
+    project_id: string;
     label: string;
     startDate?: Date;
     endDate?: Date;
     actualEndDate?: Date;
     status?: number;
-    phase_order?: number;
+    phase_order: number;
+    phase_label: string;
     created_at: Date;
 }
 
@@ -69,18 +70,24 @@ export interface IPriority {
 
 export interface IMilestone {
     id: string;
-    phase_label: string;
+    project_id: string;
     label: string;
-    description: string;
-    color: string;
+    phase_label: string;
+    startDate?: Date;
+    endDate?: Date;
+    actualEndDate?: Date;
+    status: number;
     milestone_order: number;
+    created_at: Date;
 }
 
 interface ITask {
     id: string;
     project_id: string;
     phase_id: string;
+    milestone_id: string;
     phase_label: string;
+    milestone_label: string;
     parent_task_id: string | null; 
 
     status: number;
@@ -170,6 +177,9 @@ interface ICustomFieldData {
     id: string;
     order?: number;
     phase_order?: number;
+    milestone_order?: number;
+    abbreviation?: string;
+    phase_label?: string;
     status?: number;
     label?: string;
     color?: string;
@@ -190,6 +200,7 @@ type ProjectWithOptions = {
     description: string;
     category: "internal" | "external";
     phases?: Omit<IPhase, 'created_at'>[];
+    milestones?: Omit<IMilestone, 'created_at'>[];
     statuses?: Omit<IStatus, 'created_at' | 'updated_at'>[];
     priorities?: Omit<IPriority, 'created_at' | 'updated_at'>[];
     tasks?: Omit<ITask, 'created_at' | 'updated_at'>[];
@@ -232,12 +243,15 @@ interface ITaskWithOptions extends Partial<ITask> {
         status: number;
         phase_order: number;
     };
-    milestone?: {
+    milestone_id?: {
         id: string;
         label: string;
-        color: string;
+        phase_label: string;
+        startDate: Date;
+        endDate: Date;
+        actualEndDate: Date;
+        status: number;
         milestone_order: number;
-        description?: string;
     };
     task_attachments?: {
         id: string;
@@ -303,4 +317,17 @@ type OverviewTask = {
         order: number;
     } | null;
     endDate?: Date;
+}
+
+interface MilestoneTab {
+    id: string;
+    value: string;
+    label: string;
+    phaseLabel: string;
+    order: number;
+    status: number;
+    startDate?: Date;
+    endDate?: Date;
+    actualEndDate?: Date;
+    tasks: ITaskWithOptions[];
 }

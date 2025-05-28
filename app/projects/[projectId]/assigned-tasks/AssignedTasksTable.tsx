@@ -3,6 +3,7 @@
 import { useAssignedTasksQueries } from "@/hooks/useAssignedTasksQueries";
 import { columns } from "./components/columns";
 import { DataTable } from "./components/data-table";
+import { AssignedTasksSkeleton } from "./components/page-skeleton";
 
 interface Props {
     userId: string;
@@ -10,8 +11,12 @@ interface Props {
 }
 
 export default function AssignedTasksTable({ projectId, userId }: Props) {
-    const { assignedTasks } = useAssignedTasksQueries(projectId, userId);
+    const { assignedTasks, isLoading } = useAssignedTasksQueries(projectId, userId);
     const isNoAssignedTasks = assignedTasks?.length != 0 ? true : false;
+
+    if (isLoading) {
+        return <AssignedTasksSkeleton />;
+      }
     
     return (
         <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">

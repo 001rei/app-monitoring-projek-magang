@@ -1,4 +1,6 @@
-import { useState } from "react"
+'use client';
+
+import { useMemo, useState } from "react"
 import {
     type ColumnDef,
     type ColumnFiltersState,
@@ -15,9 +17,10 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import AddTaskDialog from "./AddTaskDialog"
-import PhaseDatePicker from "./PhaseDatePicker"
-import { CalendarDays, CheckCircle, ClipboardListIcon } from "lucide-react"
-import { PhaseAction } from "./PhaseAction"
+import { ClipboardListIcon } from "lucide-react"
+import { PhasePeriodDisplay } from "./PhasePeriodDisplay"
+import { Separator } from "@/components/ui/separator";
+import { MilestonePeriodDisplay } from "./MilestonePeriodDisplay";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -26,10 +29,24 @@ interface DataTableProps<TData, TValue> {
     phaseId: string;
     phaseOrder: number;
     phaseStatus: number;
+    phaseStart: Date | null;
+    phaseEnd: Date | null;
+    phaseCompleted: Date | null;
+    milestoneId: string;
+    milestoneLabel: string;
+    milestoneOrder: number;
+    milestoneStatus: number;
+    milestoneStart: Date | null;
+    milestoneEnd: Date | null;
+    milestoneCompleted: Date | null;
     projectId: string;
 }
 
-export function DataTable<TData, TValue>({ columns, data, phaseLabel, phaseId, phaseOrder, phaseStatus }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>(
+    { columns, data,
+        phaseLabel, phaseId, phaseOrder, phaseStatus, phaseStart, phaseEnd, phaseCompleted,
+        milestoneId, milestoneLabel, milestoneOrder, milestoneStatus, milestoneStart, milestoneEnd, milestoneCompleted
+    }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([
         { id: "status", desc: false }
     ]);
@@ -62,112 +79,112 @@ export function DataTable<TData, TValue>({ columns, data, phaseLabel, phaseId, p
     });
 
     const isPhaseDone = phaseStatus === 2;
+    const isMilestoneDone = milestoneStatus === 2;
 
-    const startDate = table.getRowModel().rows?.length && table.getRowModel().rows[0].original.phase_id.startDate
-        ? new Date(table.getRowModel().rows[0].original.phase_id.startDate)
-        : null;
-    const endDate = table.getRowModel().rows?.length && table.getRowModel().rows[0].original.phase_id.endDate
-        ? new Date(table.getRowModel().rows[0].original.phase_id.endDate)
-        : null;
-    const actualEndDate = table.getRowModel().rows?.length && table.getRowModel().rows[0].original.phase_id.actualEndDate
-        ? new Date(table.getRowModel().rows[0].original.phase_id.actualEndDate)
-        : null;
+    const memoizedInfo = useMemo(() => (
+        <>
+            <PhasePeriodDisplay
+                isPhaseDone={isPhaseDone}
+                startDate={phaseStart}
+                endDate={phaseEnd}
+                actualEndDate={phaseCompleted}
+                phaseId={phaseId}
+                phaseLabel={phaseLabel}
+                phaseOrder={phaseOrder}
+                phaseStatus={phaseStatus}
+            />
+            <MilestonePeriodDisplay 
+                isMilestoneDone={isMilestoneDone}
+                startDate={milestoneStart}
+                endDate={milestoneEnd}
+                actualEndDate={milestoneCompleted}
+                milestoneId={milestoneId}
+                milestoneLabel={milestoneLabel}
+                milestoneOrder={milestoneOrder}
+                milestoneStatus={milestoneStatus}
+            />
+        </>
+        
+    ), [isPhaseDone, phaseStart, phaseEnd, phaseCompleted, milestoneStart, milestoneEnd, milestoneCompleted]);
 
     return (
-        <div className="space-y-4">
-            <div className={`p-3 rounded-sm ${isPhaseDone ? 'bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800' : 'bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800'} shadow-sm`}>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                        {isPhaseDone ? (
-                            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-300 mr-1" />
-                        ) : (
-                            <CalendarDays className="h-4 w-4 text-blue-600 dark:text-blue-300 mr-1" />
-                        )}
-                        <p className={`text-sm ${isPhaseDone ? 'text-green-900 dark:text-green-100' : 'text-blue-900 dark:text-blue-100'}`}>
-                            <strong>{isPhaseDone ? 'Phase Period' : 'Current Phase Period'}</strong>:{" "}
-                            {startDate ? startDate.toDateString() + ' -' : "Not set"} {endDate ? endDate.toDateString() : ""}
-                            {isPhaseDone && actualEndDate && (
-                                <span className="ml-2">
-                                    (Completed on: {actualEndDate.toDateString()})
-                                </span>
-                            )}
-                        </p>
+        <>
+            <Separator className="mb-5" />
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-9 gap-4">
+                
+                    <div className="lg:col-span-2 space-y-4">
+                        {memoizedInfo}
                     </div>
-                    <div className="flex items-center gap-2">
-                        <PhaseDatePicker
-                            phaseId={phaseId}
-                            phaseStatus={phaseStatus}
-                        />
-                        <PhaseAction
-                            phaseId={phaseId as string}
-                            phaseOrder={phaseOrder as number}
-                            phaseLabel={phaseLabel}
-                            phaseStatus={phaseStatus}
-                        />
+
+                    <div className="lg:col-span-7 space-y-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">  
+                            <Input
+                                placeholder="Filter tasks..."
+                                value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+                                onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
+                                className="w-full sm:w-auto"
+                            />
+                            <AddTaskDialog
+                                phaseId={phaseId as string}
+                                phaseLabel={phaseLabel as string}
+                                phaseStatus={phaseStatus}
+                                milestoneId={milestoneId as string}
+                                milestoneLabel={milestoneLabel as string}
+                                milestoneStatus={milestoneStatus as number}
+                                isOpen={isOpen}
+                                onOpenChange={setIsOpen}
+                            />
+                        </div>
+
+                        <div className="rounded-md border">
+                            <Table>
+                                <TableHeader>
+                                    {table.getHeaderGroups().map((headerGroup) => (
+                                        <TableRow key={headerGroup.id}>
+                                            {headerGroup.headers.map((header) => (
+                                                <TableHead key={header.id}>
+                                                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                                </TableHead>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                                </TableHeader>
+                                <TableBody>
+                                    {table.getRowModel().rows?.length ? (
+                                        table.getRowModel().rows.map((row) => (
+                                            <TableRow
+                                                key={row.id}
+                                                data-state={row.getIsSelected() && "selected"}
+                                                className={`
+                                                ${row.original.status === "done" ? "bg-muted/50" : ""}
+                                                ${row.getParentRow() ? "bg-muted hover:bg-muted" : ""} 
+                                            `}
+                                            >
+                                                {row.getVisibleCells().map((cell) => (
+                                                    <TableCell key={cell.id}>
+                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={columns.length} className="py-12">
+                                                <div className="flex flex-col items-center justify-center space-y-2">
+                                                    <ClipboardListIcon className="h-7 w-7 text-gray-400" />
+                                                    <p className="text-base font-medium text-gray-500">No tasks found</p>
+                                                    <p className="text-sm text-gray-400">Create a new task to get started</p>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div className="flex items-center justify-between">
-                <Input
-                    placeholder="Filter tasks..."
-                    value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
-                    className="max-w-sm"
-                />
-                <AddTaskDialog
-                    phaseId={phaseId as string}
-                    phaseLabel={phaseLabel as string}
-                    phaseStatus={phaseStatus}
-                    isOpen={isOpen}
-                    onOpenChange={setIsOpen}
-                />
-            </div>
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead key={header.id}>
-                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                                        </TableHead>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                    className={`
-                                        ${row.original.status === "done" ? "bg-muted/50" : ""}
-                                        ${row.getParentRow() ? "bg-muted hover:bg-muted" : ""} 
-                                    `}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                    <TableCell colSpan={columns.length} className="py-12">
-                                    <div className="flex flex-col items-center justify-center space-y-2">
-                                            <ClipboardListIcon className="h-7 w-7 text-gray-400" />
-                                        <p className="text-base font-medium text-gray-500">No tasks found</p>
-                                        <p className="text-sm text-gray-400">Create a new task to get started</p>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-        </div>
+        </>
     )
 }

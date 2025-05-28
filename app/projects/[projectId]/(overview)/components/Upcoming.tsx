@@ -35,7 +35,7 @@ export function UpcomingDeadlines({ tasks, projectId }: Props) {
             const timeDiff = endDate.getTime() - currentDate.getTime();
             const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
-            return daysDiff >= 0 && daysDiff <= 7;
+            return task.status.label !== 'Done' && daysDiff >= 0 && daysDiff <= 7;
         });
 
         return filteredTasks.sort((a, b) => {
@@ -59,7 +59,7 @@ export function UpcomingDeadlines({ tasks, projectId }: Props) {
                 .in('id', taskIds);
 
             if (error) throw error;
-            console.log(`Updated ${taskIds.length} tasks to overdue`);
+    
         } catch (error) {
             console.error('Error updating tasks status:', error);
         }

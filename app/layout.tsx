@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Geist, Roboto } from 'next/font/google'
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -10,13 +11,17 @@ export const metadata: Metadata = {
   description: "Simple Project Management App",
 };
 
+const roboto = Roboto({
+  subsets: ['latin'],
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={roboto.className}>
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',

@@ -19,7 +19,6 @@ export const TaskDetailsDrawer = () => {
         closeDrawer,
         updateTaskTitle,
     } = useTaskDetails();
-
     if (!selectedTask) return null;
 
     return (
@@ -39,12 +38,20 @@ export const TaskDetailsDrawer = () => {
                         />
                     </SheetTitle>
                     <SheetDescription className="text-left" asChild>
-                        <Badge
-                            variant="outline"
-                            className="text-[11px] text-gray-500 dark:text-gray-600 w-fit"
-                        >
-                            {selectedTask.phase_label}
-                        </Badge>
+                        <div className="flex gap-2">
+                            <Badge
+                                variant="outline"
+                                className="text-[11px] text-gray-500 dark:text-gray-600 w-fit"
+                            >
+                                {selectedTask.phase_label}
+                            </Badge>
+                            <Badge
+                                variant="outline"
+                                className="text-[11px] text-gray-500 dark:text-gray-600 w-fit"
+                            >
+                                {selectedTask.milestone_id?.label}
+                            </Badge>
+                        </div>
                     </SheetDescription>
                 </SheetHeader>
                 <Separator />

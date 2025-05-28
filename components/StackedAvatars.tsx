@@ -9,7 +9,7 @@ export default function StackedAvatars({ users }: { users: Partial<IUser>[] }) {
                     key={user.id}
                     id={user.id || ''}
                     name={user.name || ''}
-                    avatarUrl={user.avatar || ''}
+                    avatarUrl={user.avatar || ""}
                     description={user.description || ''}
                     showPreviewName={false}
                     avatarStyles="w-4 h-4 border-2 border-gray-300 dark:border-gray-800"

@@ -69,6 +69,10 @@ export const Assignees = () => {
         ];
     }, [members, owner]);
 
+    const filteredMembers = allMembers?.filter((member) =>
+        member.name?.toLowerCase().includes(filter.toLowerCase())
+    );
+
     const handleAssigneeToggle = (userId: string) => {
         setSelectedAssignees((prev) => {
             const isCurrentlySelected = prev.includes(userId);
@@ -219,10 +223,6 @@ export const Assignees = () => {
             
         }
     };
-
-    const filteredMembers = allMembers?.filter((member) =>
-        member.name?.toLowerCase().includes(filter.toLowerCase())
-    );
 
     const isAssigned = (userId: string) => selectedAssignees.includes(userId);
 

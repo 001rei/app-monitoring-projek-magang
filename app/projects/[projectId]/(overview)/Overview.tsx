@@ -12,6 +12,13 @@ import { usePhaseQueries } from '@/hooks/usePhaseQueries';
 import { cn } from '@/lib/utils';
 import { Chart } from './components/Chart';
 import { UpcomingDeadlines } from './components/Upcoming';
+import { ProjectTitleSkeleton } from './components/ProjectTitleSkeleton';
+import { PhaseProgressSkeleton } from './components/PhaseProgressSkeleton';
+import { StatsSkeleton } from './components/StatsSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
+import MilestoneChecklist from './components/MilestoneChecklist';
+import { useMilestoneQueries } from '@/hooks/useMilestoneQueries';
+import { IMilestone } from '@/types';
 
 interface Props {
     projectId: string;
@@ -127,6 +134,26 @@ export default function Overview({ projectId }: Props) {
         ).length
     }, [projectOverview?.tasks])
 
+    if (isLoading || !projectOverview) {
+        return (
+            <div className="flex flex-col gap-4">
+                <Card className="p-4 bg-muted/50">
+                    <ProjectTitleSkeleton />
+                </Card>
+
+                <Card className="p-4">
+                    <Skeleton className="h-64 w-full" />
+                </Card>
+
+                <Card className="p-4">
+                    <PhaseProgressSkeleton />
+                </Card>
+
+                <StatsSkeleton />
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-4">
             <Card className="p-4 bg-muted/50">
@@ -210,7 +237,7 @@ export default function Overview({ projectId }: Props) {
                                 "h-1.5 mb-1",
                                 isPhaseComplete
                                     ? "[&>div]:bg-green-500 [&>div]:dark:bg-green-400"
-                                    : "[&>div]:bg-yellow-500 [&>div]:dark:bg-yellow-400"
+                                    : "[&>div]:bg-yellow-400 [&>div]:dark:bg-yellow-300"
                             )}
                         />
                         <p className="text-[0.7rem] text-muted-foreground">
@@ -257,6 +284,7 @@ export default function Overview({ projectId }: Props) {
                 </div>
             </Card>
 
+            <MilestoneChecklist projectId={projectId} phaseLabel={currentPhase ? currentPhase.label : ''}/>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items center">
                 

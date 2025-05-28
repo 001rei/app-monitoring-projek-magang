@@ -20,12 +20,6 @@ interface TaskDetailsContextType {
             | { id: string; label: string; color: string; 'order': number; }
             | undefined
     ) => void;
-    updateTaskMilestone?: (
-        taskId: string,
-        milestone:
-            | { id: string; label: string; color: string; milestone_order: number; }
-            | undefined
-    ) => void;
     updateTaskDates? : (
          taskId: string,
          startDate?: Date | null, 
@@ -96,18 +90,6 @@ export function TaskDetailsProvider({
         onTaskUpdate?.(taskId, { priority });
     };
 
-    const updateTaskMilestone = (
-        taskId: string,
-        milestone:
-            | { id: string; label: string; color: string; milestone_order: number }
-            | undefined
-    ) => {
-        setSelectedTask((prev) =>
-            prev?.id === taskId ? { ...prev, milestone: milestone || undefined } : prev
-        );
-        onTaskUpdate?.(taskId, { milestone });
-    };
-
     const updateTaskDates = (
         taskId: string,
         startDate?: Date | null, 
@@ -143,7 +125,6 @@ export function TaskDetailsProvider({
                 updateTaskDescription,
                 updateTaskStatus,
                 updateTaskPriority,
-                updateTaskMilestone,
                 updateTaskDates,
             }}
         >

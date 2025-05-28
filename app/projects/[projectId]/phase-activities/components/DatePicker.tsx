@@ -15,28 +15,33 @@ import { useParams } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useBoardQueries } from "@/hooks/useBoardQueries";
 import { useOverviewQueries } from "@/hooks/useOverviewQueries";
+import { useMilestoneQueries } from "@/hooks/useMilestoneQueries";
+import { usePhaseQueries } from "@/hooks/usePhaseQueries";
 
 interface Props {
-    phaseId: string;
-    phaseStatus: number;
+    id: string;
+    status: number;
+    category: string;
 }
 
-export default function PhaseDatePicker({ phaseId, phaseStatus }: Props) {
+export default function DatePicker({ id, status, category }: Props) {
     const params = useParams();
     const projectId = params.projectId;
-    const isPhaseDone = phaseStatus === 2;
+    const isDone = status === 2;
 
     const { user } = useCurrentUser();
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isLoading, setIsLoading] = useState(false);
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
-    const { reloadOverview } = useOverviewQueries(projectId as string, phaseId);
+    const { reloadCurrentMilestones, reloadAllMilestone } = useMilestoneQueries(projectId as string, '');
+    const { reloadAllPhase } = usePhaseQueries(projectId as string, '');
+    const { reloadOverview } = useOverviewQueries(projectId as string, id);
     const { reloadBoard } = useBoardQueries(user?.id as string)
 
     const isDateDisabled = (date: Date) => {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); 
-        return date < today; 
+        today.setHours(0, 0, 0, 0);
+        return date < today;
     };
 
     const handleSelectDate = async () => {
@@ -44,16 +49,16 @@ export default function PhaseDatePicker({ phaseId, phaseStatus }: Props) {
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'Please select a valid dates'
-            })
+                description: 'Please select a valid date range'
+            });
             return;
         }
 
         const today = new Date();
-        today.setHours(0, 0, 0, 0); 
+        today.setHours(0, 0, 0, 0);
 
         const startDate = new Date(dateRange.from);
-        startDate.setHours(0, 0, 0, 0); 
+        startDate.setHours(0, 0, 0, 0);
 
         if (startDate < today) {
             toast({
@@ -68,33 +73,49 @@ export default function PhaseDatePicker({ phaseId, phaseStatus }: Props) {
             setIsLoading(true);
 
             const supabase = createClient();
-            const { error } = await supabase
-                .from("phases")
+            const { data, error } = await supabase
+                .from(category)
                 .update({
-                    startDate: dateRange.from, 
-                    endDate: dateRange.to,   
+                    startDate: dateRange.from,
+                    endDate: dateRange.to,
                 })
-                .eq("id", phaseId); 
+                .eq("id", id)
+                .select()
+                .single();
 
-            await reloadProjectTasks();
-            await reloadOverview();
-            await reloadBoard();
+            if (error) throw error;
 
-            if (error) {
-                throw error;
+            if (!data) {
+                throw new Error('No data returned from update');
+            }
+
+            const reloadPromises = [
+                reloadOverview(),
+                reloadProjectTasks(),
+                reloadAllMilestone(),
+                reloadAllPhase(),
+                reloadBoard()
+            ];
+
+            const results = await Promise.allSettled(reloadPromises);
+
+            const failedReloads = results.filter(r => r.status === 'rejected');
+            if (failedReloads.length > 0) {
+                console.error('Some reloads failed:', failedReloads);
+                throw new Error(`${failedReloads.length} reload operations failed`);
             }
 
             toast({
                 title: 'Success',
-                description: 'Phase period updated successfully.'
-            })
+                description: `${category} period updated successfully`
+            });
         } catch (error) {
             console.error("Failed to update date range:", error);
             toast({
                 variant: 'destructive',
                 title: 'Error',
-                description: 'Failed to update periods. Please try again'
-            })
+                description: error instanceof Error ? error.message : 'Failed to update periods. Please try again'
+            });
         } finally {
             setIsLoading(false);
         }
@@ -105,22 +126,22 @@ export default function PhaseDatePicker({ phaseId, phaseStatus }: Props) {
             <PopoverTrigger asChild>
                 <Button
                     variant="ghost"
-                    className="w-10 h-10 p-0 flex items-center justify-center"
-                    disabled={isLoading || isPhaseDone}
+                    className="p-1"
+                    disabled={isLoading || isDone}
                 >
-                    <CalendarIcon className="h-4 w-4" />
+                    <CalendarIcon className="w-1 h-1 text-gray-500" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent 
+            <PopoverContent
                 className="w-auto px-4 pb-3 flex flex-col gap-2"
-                align="end" 
+                align="end"
                 sideOffset={5}
             >
                 <Calendar
                     mode="range"
                     selected={dateRange}
                     onSelect={setDateRange}
-                    disabled={isDateDisabled} 
+                    disabled={isDateDisabled}
                 />
                 <Button
                     onClick={handleSelectDate}

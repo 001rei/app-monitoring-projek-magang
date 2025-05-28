@@ -31,12 +31,12 @@ export const Project = () => {
     const supabase = createClient();
 
     const params = useParams();
-    const { selectedTask, updateTaskMilestone, updateTaskPriority, updateTaskStatus, updateTaskDates } =
+    const { selectedTask, updateTaskPriority, updateTaskStatus, updateTaskDates } =
         useTaskDetails();
-    const { statuses, priorities, milestones } = useProjectQueries(
+    const { statuses, priorities } = useProjectQueries(
         params.projectId as string
     );
-    const { task, updateMilestone, updatePriority, updateStatus, updateDates } = useTaskQueries(
+    const { task, updatePriority, updateStatus, updateDates } = useTaskQueries(
         selectedTask?.id || ''
     );
     const { reloadProjectTasks } = useProjectQueries(params.projectId as string);
@@ -200,24 +200,6 @@ export const Project = () => {
             console.error('Error selecting status: ', error);
             toast({
                 title: 'Failed to update status',
-                variant: 'destructive',
-            });
-        }
-    };
-
-    const handleMilestoneSelect = async (milestoneId: string | null) => {
-        if (!selectedTask?.id) return;
-
-        const newMilestone = milestoneId
-            ? milestones?.find((m) => m.id === milestoneId) || null
-            : null;
-
-        try {
-            await updateMilestone(milestoneId || null);
-            updateTaskMilestone?.(selectedTask.id, newMilestone);
-        } catch (error) {
-            toast({
-                title: 'Failed to update milestone',
                 variant: 'destructive',
             });
         }
@@ -402,16 +384,6 @@ export const Project = () => {
         }
     }
 
-    const filteredMilestones = useMemo(() => {
-        if (!milestones || !selectedTask?.phase_label) return [];
-
-        return milestones
-            .filter((milestone) =>
-                milestone.phase_label === selectedTask.phase_label
-            )
-            .sort((a, b) => (a.milestone_order ?? 0) - (b.milestone_order ?? 0));
-    }, [milestones, selectedTask?.phase_label]);
-
     const startDate = task?.startDate ? new Date(task.startDate) : undefined;
     const endDate = task?.endDate ? new Date(task.endDate) : undefined;
 
@@ -422,56 +394,6 @@ export const Project = () => {
 
     return (
         <>
-            <div className="flex justify-between text-gray-500 py-2">
-                <span className="text-xs">Milestone</span>
-                <DropdownMenu>
-                    <DropdownMenuTrigger
-                        className="text-xs"
-                        disabled={isTaskDone}
-                    >
-                        {task?.milestone ? (
-                            <CustomFieldTagRenderer
-                                color={task.milestone.color}
-                                label={task.milestone.label}
-                            />
-                        ) : (
-                            'None'
-                        )}
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="mr-4">
-                        <DropdownMenuLabel className="text-xs">
-                            Set Milestone
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleMilestoneSelect(null)}>
-                            <span className="w-3 h-3 mr-2" />
-                            <div className="flex-grow">None</div>
-                        </DropdownMenuItem>
-                        {filteredMilestones?.map((milestone) => (
-                            <Tooltip key={milestone.id}>
-                                <TooltipTrigger asChild>
-                                    <DropdownMenuItem
-                                        onClick={() => handleMilestoneSelect(milestone.id)}
-                                        className="flex items-center w-full"
-                                    >
-                                        <span
-                                            className="w-3 h-3 mr-2 border rounded-full"
-                                            style={{ borderColor: milestone.color }}
-                                        />
-                                        <div className="flex-grow">{milestone.label}</div>
-                                    </DropdownMenuItem>
-                                </TooltipTrigger>
-                                {milestone.description && (
-                                    <TooltipContent side="right" align="start" sideOffset={13}>
-                                        <p>{milestone.description}</p>
-                                    </TooltipContent>
-                                )}
-                            </Tooltip>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-
             <div className="flex justify-between text-gray-500 py-2">
                 <span className="text-xs">Priority</span>
                 <DropdownMenu>

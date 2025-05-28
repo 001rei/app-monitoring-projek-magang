@@ -78,7 +78,7 @@ export const PhotoProfileUploader: React.FC<ProfilePhotoUploaderProps> = ({
     return (
         <div className={cn('w-fit relative', className)}>
             <Avatar className="w-48 h-48">
-                <AvatarImage src={currentPhotoUrl} referrerPolicy={'no-referrer'} />
+                <AvatarImage src={currentPhotoUrl} referrerPolicy={'no-referrer'} rel='preconnect'/>
                 <AvatarFallback>{currentPhotoUrl ? '' : 'CN'}</AvatarFallback>
             </Avatar>
 

@@ -16,12 +16,12 @@ export const tasks = {
                         id,
                         title,
                         phase_id ( * ),
+                        milestone_id ( * ),
                         parent_task_id,
                         phase_label,
                         creator:created_by (id,name,avatar),
                         priority ( id, label, color, "order"),
                         status ( id, label, color, "order"),
-                        milestone (id, label, color, milestone_order),
                         startDate,
                         endDate,
                         task_assignees (
@@ -42,7 +42,7 @@ export const tasks = {
         getCurrentPhase: async (projectId:string) => {
             const { data, error } = await supabase
                 .from('phases')
-                .select(`id`)
+                .select(`id, label`)
                 .eq('project_id', projectId)
                 .eq('status', 1)
                 .single();
@@ -69,6 +69,25 @@ export const tasks = {
             return data;
         },
 
+        getAllProjectMilestones: async (projectId: string) => {
+            const { data, error } = await supabase
+                .from('milestones')
+                .select('*')
+                .eq('project_id', projectId)
+            if (error) throw error;
+            return data;
+        },
+
+        getCurrentMilestones: async (projectId:string, phaseLabel: string) => {
+            const { data, error} = await supabase
+                .from('milestones')
+                .select('*')
+                .eq('project_id', projectId)
+                .eq('phase_label', phaseLabel)
+                if (error) throw error;
+                return data;
+        },
+
         getUserTasks: async (projectId: string, userId: string) => {
             const { data, error } = await supabase
                 .from('tasks')
@@ -81,7 +100,6 @@ export const tasks = {
                         creator:created_by (id,name,avatar),
                         priority ( id, label, color, "order"),
                         status ( id, label, color, "order"),
-                        milestone (id, label, color, milestone_order),
                         startDate,
                         endDate,
                         task_assignees !inner (
@@ -93,8 +111,6 @@ export const tasks = {
                 .eq('task_assignees.user_id', userId);
 
             if (error) throw error;
-            console.log(data);
-            console.log('run2');
 
             return data.map((task) => ({
                 ...task,
@@ -113,7 +129,6 @@ export const tasks = {
                     creator:created_by ( id, name, avatar, description ),
                     status ( id, label, color, order ),
                     priority ( id, label, color, order ),
-                    milestone (id, label, color, milestone_order),
                     task_assignees (
                         users ( id, name, description, avatar )
                     )
@@ -215,37 +230,51 @@ export const tasks = {
     },
 
     check: {
-        isAllTasksDone: async (projectId: string, phaseLabel: string) => {
-            const DONE_STATUS_ID = 8;
+        isPhaseMilestonesDone: async (projectId: string, phaseLabel: string) => {
+            try {
+                const { data, error  } = await supabase
+                    .from('milestones')
+                    .select('id')
+                    .eq('project_id', projectId)
+                    .eq('phase_label', phaseLabel)
+                    .neq('status', 2)
+                    .limit(1)
+                if (error) throw error;
+                return !data || data.length === 0;
+            } catch (error) {
+                console.error("Error checking milestones completion:", error);
+                throw error;
+            }
+        },
 
+        isAllMilestoneTaskDone : async (projectId: string, milestoneId: string) => {
+            const DONE_STATUS_ID = 8;
             try {
                 const { data: tasks, error: tasksError } = await supabase
                     .from('tasks')
                     .select('id')
                     .eq("project_id", projectId)
-                    .eq("phase_label", phaseLabel)
-                    .limit(1);  
+                    .eq("milestone_id", milestoneId)
+                    .limit(1);
 
                 if (tasksError) throw tasksError;
-
                 if (!tasks || tasks.length === 0) return false;
-
-                const { data: notDoneTasks, error: notDoneError } = await supabase
-                    .from("tasks")
-                    .select("id")
-                    .eq("project_id", projectId)
-                    .eq("phase_label", phaseLabel)
-                    .neq("status", DONE_STATUS_ID)
-                    .limit(1);  
-
-                if (notDoneError) throw notDoneError;
                 
+                const { data: notDoneTasks, error: notDoneError } = await supabase
+                .from("tasks")
+                .select("id")
+                .eq("project_id", projectId)
+                .eq("milestone_id", milestoneId)
+                .or(`status.is.null,status.neq.${DONE_STATUS_ID}`)
+                .limit(1);
+                
+                if (notDoneError) throw notDoneError;
                 return !notDoneTasks || notDoneTasks.length === 0;
             } catch (error) {
                 console.error("Error checking task completion status:", error);
                 throw error;
             }
-        }
+        },
     }
 
 }

@@ -29,10 +29,9 @@ export default async function InvitePage({ params, searchParams }: Props) {
         .single();
 
     if (memberCheckError || !projectMember) {
-        console.log('cok iki biang e');
         notFound();
     }
-    console.log('gak sampai');
+
     const { error: updateError } = await supabase
         .from('project_members')
         .update({
@@ -45,6 +44,5 @@ export default async function InvitePage({ params, searchParams }: Props) {
     if (updateError) {
         throw updateError;
     }
-    console.log('sampai sini');
     redirect(`/projects/${projectId}`);
 }

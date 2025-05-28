@@ -23,26 +23,30 @@ import { cn } from "@/lib/utils";
 import { useOverviewQueries } from "@/hooks/useOverviewQueries";
 
 interface AddTaskFromProps {
-    statuses?: IStatus[];
-    priorities?: IPriority[];
-    milestones?: IMilestone[];
     onSuccess?: () => void;
     phaseId: string;
-    taskId?: string;
     phaseLabel: string;
     isPhaseDone: boolean;
+    milestoneId: string;
+    milestoneLabel: string;
+    isMilestoneDone: boolean;
+    taskId?: string;
+    statuses?: IStatus[];
+    priorities?: IPriority[];
 }
 
-export default function AddTaskForm({ statuses, priorities, milestones, onSuccess, phaseId, phaseLabel, taskId, isPhaseDone }: AddTaskFromProps) {
+export default function AddTaskForm({ 
+    statuses, priorities, onSuccess, 
+    phaseId, phaseLabel, taskId, isPhaseDone,
+    milestoneId, milestoneLabel, isMilestoneDone
+}: AddTaskFromProps) {
     const params = useParams();
     const projectId = params.projectId;
-    console.log(statuses);
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState<number>();
     const [priority, setPriority] = useState("");
-    const [milestone, setMilestone] = useState("");
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
     const [isCreating, setIsCreating] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -52,17 +56,10 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
     const { reloadBoard } = useBoardQueries(user?.id as string);
 
-    const filteredMilestones = useMemo(() => {
-        return milestones?.filter(milestone => milestone.phase_label === phaseLabel)
-            .sort((a, b) => a.milestone_order - b.milestone_order) || [];
-    }, [milestones, phaseLabel]);
-
     const filteredStatuses = useMemo(() => {
         return statuses?.filter(status => status.label !== 'Overdue' && status.label !== 'Done')
             .sort((a, b) => a.order - b.order) || [];
     }, [statuses]);
-
-    console.log(filteredStatuses)
 
     const sortedPriorities = useMemo(() => {
         return priorities?.sort((a ,b) => a.order - b.order) || [];
@@ -73,8 +70,8 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
 
         if (!title.trim()) {
             newErrors.title = "Title is required";
-        } else if (title.length > 100) {
-            newErrors.title = "Title must be less than 100 characters";
+        } else if (title.length > 50) {
+            newErrors.title = "Title must be less than 50 characters";
         }
 
         if (description.length > 500) {
@@ -102,13 +99,14 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
 
             const taskData = {
                 phase_id: phaseId,
+                milestone_id: milestoneId,
+                milestone_label: milestoneLabel,
                 phase_label: phaseLabel,
                 project_id: projectId as string,
                 title,
                 description,
                 status: status || undefined,
                 priority: priority || null,
-                milestone: milestone || null,
                 startDate: dateRange?.from,
                 endDate: dateRange?.to,
                 created_by: user.id,
@@ -135,7 +133,6 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
             setDescription("");
             setStatus(undefined);
             setPriority("");
-            setMilestone("");
             setDateRange(undefined);
             setErrors({});
         } catch (error) {
@@ -159,7 +156,7 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
                 <div className="flex items-center justify-between">
                     <Label htmlFor="title">Title *</Label>
                     <span className="text-xs text-muted-foreground">
-                        {title.length}/100
+                        {title.length}/50
                     </span>
                 </div>
                 <Input
@@ -245,27 +242,6 @@ export default function AddTaskForm({ statuses, priorities, milestones, onSucces
                 </div>
             </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="milestone">Milestone</Label>
-                <Select value={milestone} onValueChange={setMilestone}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select milestone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {filteredMilestones.length > 0 ? (
-                            filteredMilestones.map((milestone) => (
-                                <SelectItem key={milestone.id} value={milestone.id}>
-                                    {milestone.description || milestone.label}
-                                </SelectItem>
-                            ))
-                        ) : (
-                            <div className="text-sm text-muted-foreground px-2 py-1.5">
-                                No milestones available
-                            </div>
-                        )}
-                    </SelectContent>
-                </Select>
-            </div>
 
             <div className="space-y-2">
                 <Label htmlFor="dateRange">Task period</Label>

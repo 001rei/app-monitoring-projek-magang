@@ -36,7 +36,7 @@ export const board = {
                     label,
                     endDate,
                     status,
-                    tasks:tasks!inner(
+                    tasks:tasks!left(
                         id,
                         status
                     )

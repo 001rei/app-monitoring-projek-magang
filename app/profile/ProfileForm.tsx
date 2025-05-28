@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { IUser } from "@/types";
-import { Eye, Loader2 } from "lucide-react";
+import { Eye, Loader2, Check } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -20,17 +20,24 @@ import { primaryButton } from "@/consts/buttonStyles";
 const profileFormSchema = z.object({
     name: z
         .string({
-            required_error: 'Name must be provided.',
+            required_error: 'Please enter your name',
+        })
+        .min(2, {
+            message: 'Name must be at least 2 characters',
         })
         .max(30, {
-            message: ''
+            message: 'Name must not exceed 30 characters'
         }),
     email: z
         .string({
-            required_error: 'Email must be provided'
+            required_error: 'Please enter your email'
         })
-        .email(),
-    description: z.string().max(300).optional(),
+        .email('Please enter a valid email address'),
+    description: z.string()
+        .max(300, {
+            message: 'Bio must not exceed 300 characters'
+        })
+        .optional(),
 });
 
 type profileFormTypes = z.infer<typeof profileFormSchema>;
@@ -42,6 +49,7 @@ interface ProfileFormProps {
 export default function ProfileForm({ data }: ProfileFormProps) {
     const [userData, setUserData] = useState<IUser>(data);
     const [isLoading, setIsLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
 
     const form = useForm<profileFormTypes>({
         resolver: zodResolver(profileFormSchema),
@@ -60,26 +68,30 @@ export default function ProfileForm({ data }: ProfileFormProps) {
                 name: data.name,
                 description: data.description,
             });
+
             toast({
                 title: 'Profile updated',
                 description: 'Your profile has been successfully updated.'
-            })
+            });
+
+            setIsSuccess(true);
+            setTimeout(() => setIsSuccess(false), 3000);
         } catch (error) {
             console.error(error);
             toast({
                 variant: 'destructive',
                 title: 'Error',
                 description: 'Failed to update profile. Please try again.'
-            })
+            });
         } finally {
             setIsLoading(false);
         }
     }
 
     return (
-        <div className="w-[24rem] md:w-[36rem] mx-auto px-6 pb-4">
-            <div className="flex justify-between items-center py-6">
-                <h1 className="text-2xl">Profile</h1>
+        <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 pb-6 space-y-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 pb-4 border-b">
+                <h1 className="text-2xl font-semibold">Profile Settings</h1>
                 {userData && (
                     <Button variant='outline' asChild>
                         <Link
@@ -92,66 +104,128 @@ export default function ProfileForm({ data }: ProfileFormProps) {
                     </Button>
                 )}
             </div>
-            <PhotoProfileUploader 
-                currentPhotoUrl={userData?.avatar} 
-                userProvider={userData?.provider} 
-                onPhotoUploaded={async (url: string) => {
-                    if (!userData) return;
-                    await users.updateProfile(userData.id, { avatar: url });
-                    setUserData({ ...userData, avatar: url })
-                }}
-            />
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                    <Input {...field} readOnly />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+
+            <div className="space-y-8">
+                <div className="flex flex-col items-center gap-4">
+                    <PhotoProfileUploader
+                        currentPhotoUrl={userData?.avatar}
+                        userProvider={userData?.provider}
+                        onPhotoUploaded={async (url: string) => {
+                            if (!userData) return;
+                            try {
+                                await users.updateProfile(userData.id, { avatar: url });
+                                setUserData({ ...userData, avatar: url });
+                                toast({
+                                    title: 'Profile photo updated',
+                                    description: 'Your profile photo has been successfully updated.'
+                                });
+                            } catch (error) {
+                                toast({
+                                    variant: 'destructive',
+                                    title: 'Error',
+                                    description: 'Failed to update profile photo.'
+                                });
+                            }
+                        }}
                     />
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="John Doe" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Bio</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Tell us little bit about yourself"
-                                        className="resize-none"
-                                        {...field}
-                                    /> 
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <Button type="submit" className='bg-blue-500 text-white hover:bg-blue-600' disabled={isLoading}>
-                        {isLoading && (<Loader2 className="mr-2 h-2 w-4 animate-spin" />)}
-                        {isLoading ? ('Updating...') : ('Update Profile')}
-                    </Button>
-                </form>
-            </Form>
+                    <p className="text-sm text-muted-foreground text-center">
+                        Click on the avatar to upload a new photo (Max 2MB)
+                    </p>
+                </div>
+
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            readOnly
+                                            className="bg-muted/50"
+                                            aria-readonly
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                    <p className="text-sm text-muted-foreground">
+                                        Contact support if you need to change your email
+                                    </p>
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Display Name</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="John Doe"
+                                            {...field}
+                                            className="focus-visible:ring-primary"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex justify-between items-center">
+                                        <FormLabel>Bio</FormLabel>
+                                        <span className="text-sm text-muted-foreground">
+                                            {field.value?.length || 0}/300
+                                        </span>
+                                    </div>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Tell us a little bit about yourself..."
+                                            className="resize-none min-h-[100px] focus-visible:ring-primary"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div className="flex justify-end pt-4">
+                            <Button
+                                type="submit"
+                                className={cn(
+                                    primaryButton,
+                                    'min-w-[150px] transition-colors',
+                                    isSuccess && 'bg-green-500 hover:bg-green-600'
+                                )}
+                                disabled={isLoading || !form.formState.isDirty}
+                            >
+                                {isSuccess ? (
+                                    <>
+                                        <Check className="mr-2 h-4 w-4" />
+                                        Updated!
+                                    </>
+                                ) : isLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Updating...
+                                    </>
+                                ) : (
+                                    'Update Profile'
+                                )}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </div>
         </div>
     );
 }

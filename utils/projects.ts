@@ -56,9 +56,8 @@ export const projects = {
 
                 if (projectError) throw projectError;
 
-                let insertedPhase: any[] = [];
                 if (projectData.phases) {
-                    const { data, error: phaseError } = await supabase
+                    const { data: dataPhase, error: phaseError } = await supabase
                         .from('phases')
                         .insert(
                             projectData.phases.map((phase) => ({
@@ -68,7 +67,19 @@ export const projects = {
                         )
                         .select('*');
                     if (phaseError) throw phaseError;
-                    insertedPhase = data || [];
+                }
+
+                if (projectData.milestones) {
+                    const { data: dataMilestone, error: milestoneError } = await supabase
+                        .from('milestones')
+                        .insert(
+                            projectData.milestones.map((milestone) => ({
+                                ...milestone,
+                                project_id: project.id,
+                            }))
+                        )
+                        .select('*');
+                    if (milestoneError) throw milestoneError;
                 }
 
                 return project;

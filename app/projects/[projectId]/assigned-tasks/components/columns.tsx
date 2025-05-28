@@ -17,7 +17,6 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
     cell: ({ row }) => {
       const params = useParams();
       const projectId = params.projectId;
-      const milestone = row.original.milestone
       
       return (
         <div className="flex space-x-2">
@@ -25,12 +24,6 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
             <CustomFieldTagRenderer
               color={'hsl(0, 0%, 75%)'}
               label={row.original.phase_label}
-            />
-          )}
-          {milestone && (
-            <CustomFieldTagRenderer
-              color={milestone.color}
-              label={milestone.label}
             />
           )}
           <span className="max-w-[500px] truncate font-medium">

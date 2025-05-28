@@ -17,7 +17,6 @@ export const users = {
     },
 
     async createUser(user: Partial<IUser>) {
-        console.log('create:', user);
         const { data, error } = await supabase
             .from('users')
             .insert([user])
@@ -29,7 +28,6 @@ export const users = {
     },
 
     async captureUserDetails(authUser: User) {
-        console.log('capture: ', authUser);
         const existingUser = await this.getUser(authUser.id).catch(() => null);
         if (existingUser) return existingUser;
 
