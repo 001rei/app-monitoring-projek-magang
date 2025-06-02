@@ -1,22 +1,23 @@
 "use client"
 
 import { useMemo } from "react"
-import { CheckCircle, CalendarDays, Construction, Clock } from "lucide-react"
+import { CheckCircle, Clock } from "lucide-react"
 import DatePicker from "./DatePicker"
-import { PhaseAction } from "./PhaseAction"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MilestoneAction } from "./MilestoneAction"
 import { Badge } from "@/components/ui/badge"
+import { useProjectAccess } from "@/hooks/useProjectAccess"
 
-interface PhasePeriodDisplayProps {
-    isMilestoneDone: boolean
-    startDate: Date | null
-    endDate: Date | null
-    actualEndDate: Date | null
-    milestoneId: string
-    milestoneStatus: number
-    milestoneOrder: number
-    milestoneLabel: string
+interface MilestonePeriodDisplayProps {
+    isMilestoneDone: boolean;
+    startDate: Date | null;
+    endDate: Date | null;
+    actualEndDate: Date | null;
+    milestoneId: string;
+    milestoneStatus: number;
+    milestoneOrder: number;
+    milestoneLabel: string;
+    projectId: string;
 }
 
 export const MilestonePeriodDisplay = ({
@@ -27,7 +28,10 @@ export const MilestonePeriodDisplay = ({
     milestoneId,
     milestoneStatus,
     milestoneLabel,
-}: PhasePeriodDisplayProps) => {
+    projectId
+}: MilestonePeriodDisplayProps) => {
+    const { hasMinRole } = useProjectAccess({ projectId });
+
     const formatDate = useMemo(
         () =>
             (date: Date | null): string => {
@@ -46,18 +50,20 @@ export const MilestonePeriodDisplay = ({
             <CardHeader className="pb-2 px-3 pt-3">
                 <div className="flex items-center justify-between gap-1">
                     <CardTitle className="text-sm font-semibold leading-tight">Milestone Period</CardTitle>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                        <DatePicker
-                            id={milestoneId}
-                            status={milestoneStatus}
-                            category="milestones"
-                        />
-                        <MilestoneAction
-                            milestoneId={milestoneId}
-                            milestoneLabel={milestoneLabel}
-                            milestoneStatus={milestoneStatus}
-                        />
-                    </div>
+                    {hasMinRole('admin') && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                            <DatePicker
+                                id={milestoneId}
+                                status={milestoneStatus}
+                                category="milestones"
+                            />
+                            <MilestoneAction
+                                milestoneId={milestoneId}
+                                milestoneLabel={milestoneLabel}
+                                milestoneStatus={milestoneStatus}
+                            />
+                        </div>
+                    )}
                 </div>
                 {isMilestoneDone ?
                     <Badge

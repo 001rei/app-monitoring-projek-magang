@@ -8,10 +8,10 @@ import { useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { createClient } from "@/utils/supabase/client";
 import { RoleSelect } from './RoleSelect';
-import { error } from "console";
 import { toast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { emails } from "@/utils/emails";
+import { UserAvatar } from "@/components/Avatar";
 
 
 
@@ -29,15 +29,15 @@ export default function InviteUsers({
 }: InviteUsersProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState<IUser[]>([]);
-    const [selectedUser, setSelectedUser] = useState<IUser | null>(null);   
+    const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
     const [role, setRole] = useState<Role>('read');
     const [isSearching, setIsSearching] = useState(false);
     const [isInviting, setIsInviting] = useState(false);
     const { user } = useCurrentUser();
-    
+
     const supabase = createClient();
 
-    const debouncedSearch = useDebounce(async(term: string) => {
+    const debouncedSearch = useDebounce(async (term: string) => {
         if (term.length < 2) {
             setSearchResults([]);
             return;
@@ -64,7 +64,7 @@ export default function InviteUsers({
         } finally {
             setIsSearching(false)
         }
-        
+
     }, 1000);
 
     const handleInviteUser = async () => {
@@ -77,7 +77,7 @@ export default function InviteUsers({
                 user_id: selectedUser.id,
                 role,
                 invitationStatus: 'invited',
-                invited_at: new Date(), 
+                invited_at: new Date(),
             }
             const { error: memberError } = await supabase
                 .from('project_members')
@@ -96,7 +96,7 @@ export default function InviteUsers({
                 role,
                 username: selectedUser.name,
                 projectName,
-                invitedByUsername: user?.name || '', 
+                invitedByUsername: user?.name || '',
             });
 
             onMemberAdded?.(newMember);
@@ -105,13 +105,13 @@ export default function InviteUsers({
                 title: 'Success',
                 description: 'Invitation sent successfully.'
             })
-            
+
             //reset
             setSelectedUser(null);
             setSearchTerm('');
             setSearchResults([]);
         } catch (error) {
-            console.error('Error Invite: ',error);
+            console.error('Error Invite: ', error);
             toast({
                 variant: 'destructive',
                 title: 'Error',
@@ -135,8 +135,8 @@ export default function InviteUsers({
             <div className="flex items-center gap-2">
                 <div className="relative ml-auto flex-1">
                     <User className="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
-                    { isSearching && <Loader className="absolute right-2.5 top-2 h-4 w-4 animate-spin" /> }
-                    <Input 
+                    {isSearching && <Loader className="absolute right-2.5 top-2 h-4 w-4 animate-spin" />}
+                    <Input
                         placeholder="Search by name ..."
                         className="w-full rounded-sm  bg-background pl-8 h-8"
                         value={searchTerm}
@@ -149,28 +149,37 @@ export default function InviteUsers({
                     {searchResults.length > 0 && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-sm shadow-lg z-10">
                             {searchResults.map((user) => (
-                                <div
-                                    key={user.id}
-                                    className="p-2 text-sm hover:bg-muted cursor-pointer"
-                                    onClick={() => {
-                                        setSelectedUser(user);
-                                        setSearchTerm(user.name);
-                                        setSearchResults([]);
-                                    }}
-                                >
-                                    {user.name}
-                                </div>
+                                <>
+                                    <div className="flex items-center p-2 gap-3">
+                                        <UserAvatar
+                                            src={user.avatar}
+                                            fallback={user.name}
+                                            className="h-5 w-5"
+                                        />
+                                        <div
+                                            key={user.id}
+                                            className="text-sm hover:bg-muted cursor-pointer"
+                                            onClick={() => {
+                                                setSelectedUser(user);
+                                                setSearchTerm(user.name);
+                                                setSearchResults([]);
+                                            }}
+                                        >
+                                            {user.name}
+                                        </div>
+                                    </div>  
+                                </>
                             ))}
                         </div>
                     )}
                 </div>
                 <RoleSelect value={role} onValueChange={setRole} />
-                <Button 
-                    onClick={handleInviteUser} 
+                <Button
+                    onClick={handleInviteUser}
                     className={cn(successButton, 'px-3')}
                     disabled={!selectedUser || isInviting}
                 >
-                    { isInviting ? 'Inviting...' : 'Invite'}
+                    {isInviting ? 'Inviting...' : 'Invite'}
                 </Button>
             </div>
         </div>

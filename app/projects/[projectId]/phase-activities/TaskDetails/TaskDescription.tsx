@@ -12,16 +12,20 @@ import { useProjectQueries } from '@/hooks/useProjectQueries';
 import { useParams } from 'next/navigation';
 import { useTaskDetails } from '../TaskDetailsContext';
 import { secondaryButton, successButton } from '@/consts/buttonStyles';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
+import { ProjectAction } from '@/consts/actions';
 
 export const TaskDescription = () => {
     const params = useParams();
-    const { selectedTask } = useTaskDetails();
-    const { task, updateDescription } = useTaskQueries(selectedTask?.id || '');
-    const { members } = useProjectQueries(params.projectId as string);
-    const [description, setDescription] = useState(task?.description || '');
+    const projectId = params.projectId as string
     const [editable, setEditable] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    
+    const { selectedTask } = useTaskDetails();
+    const { task, updateDescription } = useTaskQueries(selectedTask?.id || '');
+    const [description, setDescription] = useState(task?.description || '');
+    const { members } = useProjectQueries(projectId);
+    const { can } = useProjectAccess({ projectId });
+
     const handleSave = async () => {
         if (!selectedTask?.id) return;
         try {
@@ -54,14 +58,16 @@ export const TaskDescription = () => {
                         opened {formatRelativeTime(task?.created_at!)}
                     </span>
                 </div>
-                <Button
-                    variant="ghost"
-                    className="h-7 py-1 px-2 mx-2 text-xs"
-                    onClick={() => setEditable(true)}
-                >
-                    <Pen className="h-3 w-3 mr-2" />
-                    Edit
-                </Button>
+                {can(ProjectAction.UPDATE_TASKS) && (
+                    <Button
+                        variant="ghost"
+                        className="h-7 py-1 px-2 mx-2 text-xs"
+                        onClick={() => setEditable(true)}
+                    >
+                        <Pen className="h-3 w-3 mr-2" />
+                        Edit
+                    </Button>
+                )}
             </div>
 
             <div className="p-2 min-h-[120px]">

@@ -21,6 +21,8 @@ import { ClipboardListIcon } from "lucide-react"
 import { PhasePeriodDisplay } from "./PhasePeriodDisplay"
 import { Separator } from "@/components/ui/separator";
 import { MilestonePeriodDisplay } from "./MilestonePeriodDisplay";
+import { useProjectAccess } from "@/hooks/useProjectAccess";
+import { ProjectAction } from "@/consts/actions";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -43,7 +45,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>(
-    { columns, data,
+    { columns, data, projectId,
         phaseLabel, phaseId, phaseOrder, phaseStatus, phaseStart, phaseEnd, phaseCompleted,
         milestoneId, milestoneLabel, milestoneOrder, milestoneStatus, milestoneStart, milestoneEnd, milestoneCompleted
     }: DataTableProps<TData, TValue>) {
@@ -53,6 +55,7 @@ export function DataTable<TData, TValue>(
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = useState({});
+    const { can } = useProjectAccess({ projectId });
     const [expanded, setExpanded] = useState({});
     const [isOpen, setIsOpen] = useState(false);
 
@@ -92,7 +95,8 @@ export function DataTable<TData, TValue>(
                 phaseLabel={phaseLabel}
                 phaseOrder={phaseOrder}
                 phaseStatus={phaseStatus}
-            />
+                projectId={projectId}
+                />
             <MilestonePeriodDisplay 
                 isMilestoneDone={isMilestoneDone}
                 startDate={milestoneStart}
@@ -102,6 +106,7 @@ export function DataTable<TData, TValue>(
                 milestoneLabel={milestoneLabel}
                 milestoneOrder={milestoneOrder}
                 milestoneStatus={milestoneStatus}
+                projectId={projectId}
             />
         </>
         
@@ -125,16 +130,18 @@ export function DataTable<TData, TValue>(
                                 onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
                                 className="w-full sm:w-auto"
                             />
-                            <AddTaskDialog
-                                phaseId={phaseId as string}
-                                phaseLabel={phaseLabel as string}
-                                phaseStatus={phaseStatus}
-                                milestoneId={milestoneId as string}
-                                milestoneLabel={milestoneLabel as string}
-                                milestoneStatus={milestoneStatus as number}
-                                isOpen={isOpen}
-                                onOpenChange={setIsOpen}
-                            />
+                            {can(ProjectAction.CREATE_TASKS) && (
+                                <AddTaskDialog
+                                    phaseId={phaseId as string}
+                                    phaseLabel={phaseLabel as string}
+                                    phaseStatus={phaseStatus}
+                                    milestoneId={milestoneId as string}
+                                    milestoneLabel={milestoneLabel as string}
+                                    milestoneStatus={milestoneStatus as number}
+                                    isOpen={isOpen}
+                                    onOpenChange={setIsOpen}
+                                />
+                            )}
                         </div>
 
                         <div className="rounded-md border">

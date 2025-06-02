@@ -19,23 +19,26 @@ import { useOverviewQueries } from "@/hooks/useOverviewQueries"
 import { format } from "date-fns"
 import { useBoardQueries } from "@/hooks/useBoardQueries"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { useProjectAccess } from "@/hooks/useProjectAccess"
+import { ProjectAction } from "@/consts/actions"
 
 export const columns: ColumnDef<ITaskWithOptions>[] = [
     {
         id: "select",
         cell: ({ row }) => {
             const params = useParams();
-            const projectId = params.projectId;
+            const projectId = params.projectId as string;
             const supabase = createClient();
             const [isLoading, setIsLoading] = useState(false);
             const [isDialogOpen, setIsDialogOpen] = useState(false);
             const [isChecked, setIsChecked] = useState(row.original.status?.label === "Done");
+            const { can } = useProjectAccess({ projectId });
 
             const task = row.original;
             const { user } = useCurrentUser();
-            const { updateStatusOnTable } = useProjectQueries(projectId as string || "", task.id);
-            const { reloadProjectTasks } = useProjectQueries(projectId as string || "");
-            const { reloadOverview } = useOverviewQueries(projectId as string, task.phase_id?.id as string)
+            const { updateStatusOnTable } = useProjectQueries(projectId || "", task.id);
+            const { reloadProjectTasks } = useProjectQueries(projectId || "");
+            const { reloadOverview } = useOverviewQueries(projectId, task.phase_id?.id as string)
             const { reloadBoard } = useBoardQueries(user?.id as string);
 
 
@@ -86,27 +89,29 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
 
             return (
                 <>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Checkbox
-                                    checked={isChecked}
-                                    onCheckedChange={handleCheckboxClick}
-                                    disabled={isLoading || isChecked}
-                                    aria-label="Select row"
-                                />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Mark this task as done</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-
+                    {can(ProjectAction.UPDATE_TASKS) && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Checkbox
+                                        checked={isChecked}
+                                        onCheckedChange={handleCheckboxClick}
+                                        disabled={isLoading || isChecked}
+                                        aria-label="Select row"
+                                    />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Mark this task as done</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                    
                     <TaskDoneConfirmationDialog
                         isOpen={isDialogOpen}
                         onClose={handleCancel}
                         onConfirm={handleConfirm}
-                    />
+                    />  
                 </>
             );
         },

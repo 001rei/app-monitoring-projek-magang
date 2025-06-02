@@ -24,25 +24,29 @@ import { useProjectOwner } from '@/hooks/useProjectOwner';
 import { TaskActivity } from '@/types';
 import { useAssignedTasksQueries } from '@/hooks/useAssignedTasksQueries';
 import { toast } from '@/hooks/use-toast';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
+import { ProjectAction } from '@/consts/actions';
 
 export const Assignees = () => {
     const params = useParams();
+    const projectId = params.projectId as string;
     const { selectedTask } = useTaskDetails();
     const { user } = useCurrentUser();
     const { members, reloadProjectTasks } = useProjectQueries(
-        params.projectId as string
+        projectId
     );
     const { reloadAssignedTasks } = useAssignedTasksQueries(
-        params.projectId as string, user?.id as string
+        projectId, user?.id as string
     )
     const { task, updateAssignees } = useTaskQueries(selectedTask?.id || '');
     const { createActivities } = useActivityQueries(selectedTask?.id || '');
-    const { owner } = useProjectOwner(params.projectId as string);
+    const { owner } = useProjectOwner(projectId);
 
     const [filter, setFilter] = useState('');
     const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const { can } = useProjectAccess({ projectId });
 
     // Initialize selected assignees when task loads or changes
     useEffect(() => {
@@ -220,7 +224,7 @@ export const Assignees = () => {
             } finally {
                 setIsLoading(false);
             }
-            
+
         }
     };
 
@@ -230,40 +234,42 @@ export const Assignees = () => {
         <>
             <div className="flex justify-between items-center text-gray-500">
                 <span className="text-xs">Assignees</span>
-                <Popover open={isOpen} onOpenChange={handlePopoverOpenChange}>
-                    <PopoverTrigger>
-                        <Settings className="w-4 h-4" />
-                    </PopoverTrigger>
-                    <PopoverContent className="mr-4">
-                        <Label className="mb-2 text-xs">Assign people to this task</Label>
-                        <Input
-                            placeholder="filter assignees"
-                            className="h-7 my-1 rounded-sm bg-gray-100 dark:bg-black"
-                            value={filter}
-                            onChange={(e) => setFilter(e.target.value)}
-                        />
-                        <Separator className="my-2" />
-                        {filteredMembers?.map((member) => (
-                            <div
-                                key={member.id}
-                                className="flex items-center hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 p-1 text-xs"
-                                onClick={() => handleAssigneeToggle(member.id || '')}
-                            >
-                                <Checkbox
-                                    checked={isAssigned(member.id || '')}
-                                    className="w-4 h-4 mr-4 rounded-sm "
-                                />
-                                <Avatar className="w-4 h-4 mr-2">
-                                    <AvatarImage src={member.avatar} />
-                                    <AvatarFallback>
-                                        {member.name?.charAt(0) || ''}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span>{member.name}</span>
-                            </div>
-                        ))}
-                    </PopoverContent>
-                </Popover>
+                {can(ProjectAction.UPDATE_TASKS) && (
+                    <Popover open={isOpen} onOpenChange={handlePopoverOpenChange}>
+                        <PopoverTrigger>
+                            <Settings className="w-4 h-4" />
+                        </PopoverTrigger>
+                        <PopoverContent className="mr-4">
+                            <Label className="mb-2 text-xs">Assign people to this task</Label>
+                            <Input
+                                placeholder="filter assignees"
+                                className="h-7 my-1 rounded-sm bg-gray-100 dark:bg-black"
+                                value={filter}
+                                onChange={(e) => setFilter(e.target.value)}
+                            />
+                            <Separator className="my-2" />
+                            {filteredMembers?.map((member) => (
+                                <div
+                                    key={member.id}
+                                    className="flex items-center hover:cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900 p-1 text-xs"
+                                    onClick={() => handleAssigneeToggle(member.id || '')}
+                                >
+                                    <Checkbox
+                                        checked={isAssigned(member.id || '')}
+                                        className="w-4 h-4 mr-4 rounded-sm "
+                                    />
+                                    <Avatar className="w-4 h-4 mr-2">
+                                        <AvatarImage src={member.avatar} />
+                                        <AvatarFallback>
+                                            {member.name?.charAt(0) || ''}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <span>{member.name}</span>
+                                </div>
+                            ))}
+                        </PopoverContent>
+                    </Popover>
+                )}
             </div>
             <div className="text-xs pt-2 pb-4">
                 {task?.assignees && task.assignees.length > 0 ? (
@@ -281,13 +287,15 @@ export const Assignees = () => {
                 ) : (
                     <>
                         No one -
-                        <Button
-                            onClick={handleAssignSelf}
-                            className="px-1 text-blue-500 bg-transparent text-xs h-4 font-normal hover:bg-transparent"
-                            disabled={isLoading}
-                        >
-                            Assign yourself
-                        </Button>
+                        {can(ProjectAction.UPDATE_TASKS) && (
+                            <Button
+                                onClick={handleAssignSelf}
+                                className="px-1 text-blue-500 bg-transparent text-xs h-4 font-normal hover:bg-transparent"
+                                disabled={isLoading}
+                            >
+                                Assign yourself
+                            </Button>
+                        )}
                     </>
                 )}
             </div>

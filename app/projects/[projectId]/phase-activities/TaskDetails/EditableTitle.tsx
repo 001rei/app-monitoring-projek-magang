@@ -1,8 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ProjectAction } from '@/consts/actions';
 import { secondaryButton, successButton } from '@/consts/buttonStyles';
 import { useAssignedTasksQueries } from '@/hooks/useAssignedTasksQueries';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
 import { useProjectQueries } from '@/hooks/useProjectQueries';
 import { cn } from '@/lib/utils';
 import { Check, X } from 'lucide-react';
@@ -22,17 +24,17 @@ export const EditableTitle = ({
     setIsEditing,
     onSave,
 }: Props) => {
+    const params = useParams();
+    const projectId = params.projectId as string;
     const [text, setText] = useState(title);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
-    const params = useParams();
     const { user } = useCurrentUser();
+    const { can } = useProjectAccess({ projectId });
     const { reloadAssignedTasks } = useAssignedTasksQueries(
-        params.projectId as string, user?.id as string
+        projectId, user?.id as string
     );
-    const { reloadProjectTasks } = useProjectQueries(
-        params.projectId as string
-    );
+    const { reloadProjectTasks } = useProjectQueries(projectId);
 
     const handleSave = async () => {
         if (text.length > 50) {
@@ -130,12 +132,14 @@ export const EditableTitle = ({
             >
                 {text}
             </h1>
-            <Button
-                onClick={() => setIsEditing(true)}
-                className={cn(secondaryButton, 'px-2 h-7 hidden md:inline-flex')}
-            >
-                Edit
-            </Button>
+            {can(ProjectAction.UPDATE_TASKS) && (
+                <Button
+                    onClick={() => setIsEditing(true)}
+                    className={cn(secondaryButton, 'px-2 h-7 hidden md:inline-flex')}
+                >
+                    Edit
+                </Button>
+            )}
         </div>
     );
 };

@@ -6,16 +6,18 @@ import DatePicker from "./DatePicker"
 import { PhaseAction } from "./PhaseAction"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useProjectAccess } from "@/hooks/useProjectAccess"
 
 interface PhasePeriodDisplayProps {
-    isPhaseDone: boolean
-    startDate: Date | null
-    endDate: Date | null
-    actualEndDate: Date | null
-    phaseId: string
-    phaseStatus: number
-    phaseOrder: number
-    phaseLabel: string
+    isPhaseDone: boolean;
+    startDate: Date | null;
+    endDate: Date | null;
+    actualEndDate: Date | null;
+    phaseId: string;
+    phaseStatus: number;
+    phaseOrder: number;
+    phaseLabel: string;
+    projectId: string;
 }
 
 export const PhasePeriodDisplay = ({
@@ -27,7 +29,10 @@ export const PhasePeriodDisplay = ({
     phaseStatus,
     phaseOrder,
     phaseLabel,
+    projectId
 }: PhasePeriodDisplayProps) => {
+    const { hasMinRole } = useProjectAccess({ projectId });
+    
     const formatDate = useMemo(
         () =>
             (date: Date | null): string => {
@@ -46,19 +51,21 @@ export const PhasePeriodDisplay = ({
             <CardHeader className="pb-2 px-3 pt-3">
                 <div className="flex items-center justify-between gap-1">
                     <CardTitle className="text-sm font-semibold leading-tight">Phase Period</CardTitle>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                        <DatePicker
-                            id={phaseId}
-                            status={phaseStatus}
-                            category="phases"
-                        />
-                        <PhaseAction
-                            phaseId={phaseId}
-                            phaseOrder={phaseOrder}
-                            phaseLabel={phaseLabel}
-                            phaseStatus={phaseStatus}
-                        />
-                    </div>
+                    {hasMinRole('admin') && (
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                            <DatePicker
+                                id={phaseId}
+                                status={phaseStatus}
+                                category="phases"
+                            />
+                            <PhaseAction
+                                phaseId={phaseId}
+                                phaseOrder={phaseOrder}
+                                phaseLabel={phaseLabel}
+                                phaseStatus={phaseStatus}
+                            />
+                        </div>
+                    )} 
                 </div>
                 {isPhaseDone ?
                     <Badge

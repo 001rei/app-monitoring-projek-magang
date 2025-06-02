@@ -53,7 +53,7 @@ export default function OpenTaskDetails({ row }: Props) {
                 };
     return (
         <TaskDetailsProvider onTaskUpdate={handleTaskUpdate}>
-            <TaskActionsCell row={row} />
+            <TaskActionsCell row={row} projectId={projectId as string} />
             <TaskDetailsDrawer />
         </TaskDetailsProvider>
     );

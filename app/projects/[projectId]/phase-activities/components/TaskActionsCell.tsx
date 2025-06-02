@@ -6,9 +6,17 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { useTaskDetails } from "../TaskDetailsContext";
 import { prefetchTask } from "@/hooks/useTaskQueries";
 import AddTaskDialog from "./AddTaskDialog";
+import { useProjectAccess } from "@/hooks/useProjectAccess";
+import { ProjectAction } from "@/consts/actions";
 
-export function TaskActionsCell({ row }: { row: any }) {
+interface Props {
+    row: any;
+    projectId: string;
+}
+
+export function TaskActionsCell({ row, projectId }: Props) {
     const [isAddSubtaskDialogOpen, setIsAddSubtaskDialogOpen] = useState(false);
+     const { can } = useProjectAccess({ projectId });
 
     const queryClient = useQueryClient();
     const { openDrawer } = useTaskDetails();
@@ -37,7 +45,7 @@ export function TaskActionsCell({ row }: { row: any }) {
                         <span>Detail</span>
                     </DropdownMenuItem>
 
-                    {!isSubtask && !isPhaseDone && (
+                    {can(ProjectAction.CREATE_TASKS) && !isSubtask && !isPhaseDone && (
                         <DropdownMenuItem className="cursor-pointer flex items-center" onSelect={() => setIsAddSubtaskDialogOpen(true)}>
                             <Plus className="mr-2 h-4 w-4" />
                             <span>Add Subtask</span>
@@ -55,6 +63,9 @@ export function TaskActionsCell({ row }: { row: any }) {
                     phaseId={row.original.phase_id.id as string}
                     phaseLabel={row.original.phase_label as string}
                     phaseStatus={phaseStatus}
+                    milestoneId={row.original.milestone_id.id as string}
+                    milestoneLabel={row.original.milestone_id.label as string}
+                    milestoneStatus={row.original.milestone_id.status as number}
                 />
             )}
         </>

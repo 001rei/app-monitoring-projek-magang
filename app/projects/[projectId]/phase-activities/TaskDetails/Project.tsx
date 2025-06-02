@@ -24,6 +24,8 @@ import { Archive, ChevronDown, File, FileText, Image, Loader2, Plus, PlusCircle,
 import { createClient } from '@/utils/supabase/client';
 import { tasks } from '@/utils/tasks';
 import { getFileName } from '@/lib/helpers';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
+import { ProjectAction } from '@/consts/actions';
 
 export const Project = () => {
     const STORAGE_URL = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL;
@@ -31,19 +33,19 @@ export const Project = () => {
     const supabase = createClient();
 
     const params = useParams();
+    const projectId = params.projectId as string;
     const { selectedTask, updateTaskPriority, updateTaskStatus, updateTaskDates } =
         useTaskDetails();
-    const { statuses, priorities } = useProjectQueries(
-        params.projectId as string
-    );
+    const { statuses, priorities } = useProjectQueries(projectId);
     const { task, updatePriority, updateStatus, updateDates } = useTaskQueries(
         selectedTask?.id || ''
     );
-    const { reloadProjectTasks } = useProjectQueries(params.projectId as string);
+    const { reloadProjectTasks } = useProjectQueries(projectId);
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const { user } = useCurrentUser();
     const { createActivities } = useActivityQueries(selectedTask?.id || '');
+    const { can } = useProjectAccess({ projectId });
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     const [localAttachments, setLocalAttachments] = useState<Partial<ITaskAttachment>[]>([]);
@@ -399,7 +401,7 @@ export const Project = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger
                         className="text-xs"
-                        disabled={isTaskDone}
+                        disabled={can(ProjectAction.UPDATE_TASKS) || isTaskDone}
                     >
                         {task?.priority ? (
                             <CustomFieldTagRenderer
@@ -447,7 +449,7 @@ export const Project = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger
                         className="text-xs"
-                        disabled={isTaskDone}
+                        disabled={can(ProjectAction.UPDATE_TASKS) || isTaskDone}
                     >
                         {task?.status ? (
                             <CustomFieldTagRenderer
@@ -495,7 +497,7 @@ export const Project = () => {
                 <DatePicker
                     date={startDate}
                     onSelect={(date) => !isTaskDone && handleDateChange('startDate', date)}
-                    disabled={isTaskDone}
+                    disabled={can(ProjectAction.UPDATE_TASKS) || isTaskDone}
                 />
             </div>
 
@@ -504,7 +506,7 @@ export const Project = () => {
                 <DatePicker
                     date={endDate}
                     onSelect={(date) => !isTaskDone && handleDateChange('endDate', date)}
-                    disabled={isTaskDone}
+                    disabled={can(ProjectAction.UPDATE_TASKS) || isTaskDone}
                 />
             </div>
 
@@ -518,7 +520,7 @@ export const Project = () => {
                                 ({allAttachments.length})
                                 <ChevronDown className="w-3 h-3 ml-1" />
                             </button>
-                        ) : (
+                        ) : can(ProjectAction.UPDATE_TASKS) ? (
                             <div>
                                 <label
                                     htmlFor="file-upload"
@@ -544,6 +546,8 @@ export const Project = () => {
                                     multiple
                                 />
                             </div>
+                        ) : (
+                            <span className="text-xs">No attachments</span>
                         )}
                     </DropdownMenuTrigger>
 
@@ -559,13 +563,13 @@ export const Project = () => {
                                         <DropdownMenuItem
                                             key={attachment.file_path}
                                             className="
-                                                text-xs px-2 py-1.5 rounded flex justify-between items-center
-                                                hover:bg-gray-50 dark:hover:bg-gray-800
-                                                focus:bg-gray-50 dark:focus:bg-gray-800
-                                                active:bg-gray-50 dark:active:bg-gray-800
-                                                data-[highlighted]:bg-gray-50 dark:data-[highlighted]:bg-gray-800
-                                                transition-colors
-                                            "
+                                    text-xs px-2 py-1.5 rounded flex justify-between items-center
+                                    hover:bg-gray-50 dark:hover:bg-gray-800
+                                    focus:bg-gray-50 dark:focus:bg-gray-800
+                                    active:bg-gray-50 dark:active:bg-gray-800
+                                    data-[highlighted]:bg-gray-50 dark:data-[highlighted]:bg-gray-800
+                                    transition-colors
+                                "
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 handleDownloadAttachment(attachment.file_path as string, attachment.file_name as string);
@@ -589,70 +593,75 @@ export const Project = () => {
                                                 )}
                                                 <span className="truncate pr-2">{attachment.file_name}</span>
                                             </div>
-                                            <div className="flex items-center flex-shrink-0">
-                                                <span className="text-xs text-gray-400 mr-2">
-                                                    {attachment.file_type}
-                                                </span>
-                                                <button
-                                                    className="text-gray-400 hover:text-red-500 transition-colors"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteFile(attachment.file_path as string)
-                                                    }}
-                                                    title="Delete"
-                                                    disabled={isDeleting || deletingAttachments.includes(attachment.file_path as string)}
-                                                >
-                                                    {deletingAttachments.includes(attachment.file_path as string) || isDeleting ? (
-                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                                    ) : (
-                                                        <Trash2 className="h-3.5 w-3.5" />
-                                                    )}
-                                                </button>
-                                            </div>
+                                            {can(ProjectAction.UPDATE_TASKS) && (
+                                                <div className="flex items-center flex-shrink-0">
+                                                    <span className="text-xs text-gray-400 mr-2">
+                                                        {attachment.file_type}
+                                                    </span>
+                                                    <button
+                                                        className="text-gray-400 hover:text-red-500 transition-colors"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteFile(attachment.file_path as string)
+                                                        }}
+                                                        title="Delete"
+                                                        disabled={isDeleting || deletingAttachments.includes(attachment.file_path as string)}
+                                                    >
+                                                        {deletingAttachments.includes(attachment.file_path as string) || isDeleting ? (
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            )}
                                         </DropdownMenuItem>
                                     );
                                 })}
                             </div>
 
-                            <DropdownMenuSeparator className="my-1" />
-
-                            <DropdownMenuItem
-                                className="
-                                    text-xs p-0 rounded 
-                                    hover:bg-gray-50 
-                                    focus:!bg-gray-50 
-                                    active:!bg-gray-50
-                                    data-[highlighted]:!bg-gray-50
-                                    dark:hover:bg-gray-800
-                                    dark:data-[highlighted]:!bg-gray-800
-                                "
-                                onSelect={(e) => e.preventDefault()}
-                                disabled={isUploading}
-                            >
-                                <label
-                                    htmlFor="file-upload"
-                                    className="w-full px-2 py-1.5 flex items-center text-blue-500 hover:text-blue-600 cursor-pointer"
-                                >
-                                    {isUploading ? (
-                                        <div className="flex items-center">
-                                            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                                            <span>Uploading...</span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <PlusCircle className="mr-2 h-4 w-4" />
-                                            <span className="font-medium">Add Attachment</span>
-                                        </>
-                                    )}
-                                </label>
-                                <input
-                                    id="file-upload"
-                                    type="file"
-                                    className="hidden"
-                                    onChange={handleFileSelect}
-                                    multiple
-                                />
-                            </DropdownMenuItem>
+                            {can(ProjectAction.UPDATE_TASKS) && (
+                                <>
+                                    <DropdownMenuSeparator className="my-1" />
+                                    <DropdownMenuItem
+                                        className="
+                                text-xs p-0 rounded 
+                                hover:bg-gray-50 
+                                focus:!bg-gray-50 
+                                active:!bg-gray-50
+                                data-[highlighted]:!bg-gray-50
+                                dark:hover:bg-gray-800
+                                dark:data-[highlighted]:!bg-gray-800
+                            "
+                                        onSelect={(e) => e.preventDefault()}
+                                        disabled={isUploading}
+                                    >
+                                        <label
+                                            htmlFor="file-upload"
+                                            className="w-full px-2 py-1.5 flex items-center text-blue-500 hover:text-blue-600 cursor-pointer"
+                                        >
+                                            {isUploading ? (
+                                                <div className="flex items-center">
+                                                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                                                    <span>Uploading...</span>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                                    <span className="font-medium">Add Attachment</span>
+                                                </>
+                                            )}
+                                        </label>
+                                        <input
+                                            id="file-upload"
+                                            type="file"
+                                            className="hidden"
+                                            onChange={handleFileSelect}
+                                            multiple
+                                        />
+                                    </DropdownMenuItem>
+                                </>
+                            )}
                         </DropdownMenuContent>
                     )}
                 </DropdownMenu>

@@ -16,16 +16,20 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useActivityQueries } from '@/hooks/useActivityQueries';
 import { useOverviewQueries } from '@/hooks/useOverviewQueries';
 import { useBoardQueries } from '@/hooks/useBoardQueries';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
+import { ProjectAction } from '@/consts/actions';
 
 
 export const OtherActions = () => {
     const { projectId } = useParams();
+    const projectIdStr = projectId as string;
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDone, setIsDone] = useState(false);
     const [isDialogDeleteOpen, setIsDialogDeleteOpen] = useState(false);
     const [isDialogDoneOpen, setIsDialogDoneOpen] = useState(false);
-    
+
     const { user } = useCurrentUser();
+    const { can } = useProjectAccess({ projectId: projectIdStr });
     const { selectedTask, closeDrawer, updateTaskStatus } = useTaskDetails();
     const { deleteTask, updateStatus } = useTaskQueries(selectedTask?.id || '');
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
@@ -130,25 +134,29 @@ export const OtherActions = () => {
 
     return (
         <div className="py-4">
-            <Button
-                onClick={() => setIsDialogDeleteOpen(true)}
-                className="flex h-6 py-4 px-4 justify-start w-full text-red-500 hover:bg-red-200 hover:dark:bg-red-950"
-                disabled={isDeleting}
-                variant={'ghost'}
-            >
-                <Trash className="w-3 h-3 mr-2" />
-                {isDeleting ? 'Deleting...' : 'Delete'}
-            </Button>
+            {can(ProjectAction.UPDATE_TASKS) && (
+                <>
+                    <Button
+                        onClick={() => setIsDialogDeleteOpen(true)}
+                        className="flex h-6 py-4 px-4 justify-start w-full text-red-500 hover:bg-red-200 hover:dark:bg-red-950"
+                        disabled={isDeleting}
+                        variant={'ghost'}
+                    >
+                        <Trash className="w-3 h-3 mr-2" />
+                        {isDeleting ? 'Deleting...' : 'Delete'}
+                    </Button>
 
-            <Button
-                onClick={() => setIsDialogDoneOpen(true)}
-                className="flex h-6 py-4 px-4 justify-start w-full text-green-500 hover:bg-green-200 hover:dark:bg-green-950"
-                disabled={isDone || isTaskDone}
-                variant={'ghost'}
-            >
-                <Check className="w-3 h-3 mr-2" />
-                {isTaskDone ? 'Already done' : 'Set as done'}
-            </Button>
+                    <Button
+                        onClick={() => setIsDialogDoneOpen(true)}
+                        className="flex h-6 py-4 px-4 justify-start w-full text-green-500 hover:bg-green-200 hover:dark:bg-green-950"
+                        disabled={isDone || isTaskDone}
+                        variant={'ghost'}
+                    >
+                        <Check className="w-3 h-3 mr-2" />
+                        {isTaskDone ? 'Already done' : 'Set as done'}
+                    </Button>
+                </>
+            )}
 
             <DeleteConfirmationDialog
                 isOpen={isDialogDeleteOpen}

@@ -17,6 +17,8 @@ import { useBoardQueries } from '@/hooks/useBoardQueries';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { AlertCircle, Loader2, ShieldAlert } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useProjectAccess } from '@/hooks/useProjectAccess';
+import { ProjectAction } from '@/consts/actions';
 
 export function ProjectSettingsForm({ project }: { project: IProject }) {
     const [isSaving, setIsSaving] = useState(false);
@@ -30,6 +32,17 @@ export function ProjectSettingsForm({ project }: { project: IProject }) {
     const { user } = useCurrentUser();
     const { reloadBoard } = useBoardQueries(user?.id as string);
     const router = useRouter();
+
+    const { can, role, isLoading } = useProjectAccess({
+        projectId: project.id,
+    });
+
+    if (isLoading) return <div>Loading...</div>;
+    if (!can(ProjectAction.VIEW_SETTINGS)) {
+        return (
+            <div>You don&apos;t have permission to manage project settings.</div>
+        );
+    }
 
     const hasChanges =
         formData.name !== project.name ||
@@ -117,47 +130,51 @@ export function ProjectSettingsForm({ project }: { project: IProject }) {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                    <div className="flex flex-col sm:flex-row justify-between gap-4 p-4 rounded-lg bg-white dark:bg-gray-900 border border-red-200 dark:border-red-800">
-                        <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                                <h4 className="font-medium">Close Project</h4>
-                                <Badge variant="secondary" className="text-xs">
-                                    Reversible
-                                </Badge>
+                    {can(ProjectAction.CLOSE_PROJECT) && (
+                        <div className="flex flex-col sm:flex-row justify-between gap-4 p-4 rounded-lg bg-white dark:bg-gray-900 border border-red-200 dark:border-red-800">
+                            <div className="space-y-1">
+                                <div className="flex items-center space-x-2">
+                                    <h4 className="font-medium">Close Project</h4>
+                                    <Badge variant="secondary" className="text-xs">
+                                        Reversible
+                                    </Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                    Disable workflows and archive this project. You can reopen it later.
+                                </p>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                                Disable workflows and archive this project. You can reopen it later.
-                            </p>
+                            <Button
+                                variant="outline"
+                                className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 hover:bg-red-50/50 dark:hover:bg-red-900/10 self-end sm:self-center"
+                                onClick={() => setShowCloseDialog(true)}
+                            >
+                                Close Project
+                            </Button>
                         </div>
-                        <Button
-                            variant="outline"
-                            className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 hover:bg-red-50/50 dark:hover:bg-red-900/10 self-end sm:self-center"
-                            onClick={() => setShowCloseDialog(true)}
-                        >
-                            Close Project
-                        </Button>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row justify-between gap-4 p-4 rounded-lg bg-white dark:bg-gray-900 border border-red-200 dark:border-red-800">
-                        <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                                <h4 className="font-medium">Delete Project</h4>
-                                <Badge variant="destructive" className="text-xs">
-                                    Permanent
-                                </Badge>
+                    )}
+                    
+                    {can(ProjectAction.DELETE_PROJECT) && (
+                        <div className="flex flex-col sm:flex-row justify-between gap-4 p-4 rounded-lg bg-white dark:bg-gray-900 border border-red-200 dark:border-red-800">
+                            <div className="space-y-1">
+                                <div className="flex items-center space-x-2">
+                                    <h4 className="font-medium">Delete Project</h4>
+                                    <Badge variant="destructive" className="text-xs">
+                                        Permanent
+                                    </Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                    Permanently remove this project and all its data. This cannot be undone.
+                                </p>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                                Permanently remove this project and all its data. This cannot be undone.
-                            </p>
+                            <Button
+                                variant="outline"
+                                className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 hover:bg-red-50/50 dark:hover:bg-red-900/10 self-end sm:self-center"
+                                onClick={() => setShowDeleteDialog(true)}
+                            >
+                                Delete Project
+                            </Button>
                         </div>
-                        <Button
-                            variant="outline"
-                            className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-700 hover:bg-red-50/50 dark:hover:bg-red-900/10 self-end sm:self-center"
-                            onClick={() => setShowDeleteDialog(true)}
-                        >
-                            Delete Project
-                        </Button>
-                    </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -203,13 +220,3 @@ export function ProjectSettingsForm({ project }: { project: IProject }) {
     );
 }
 
-// const { can, role, isLoading } = useProjectAccess({
-//     projectId: project.id,
-// });
-
-// if (isLoading) return <div>Loading...</div>;
-// if (!can(ProjectAction.VIEW_SETTINGS)) {
-//     return (
-//         <div>You don&apos;t have permission to manage project settings.</div>
-//     );
-// }
