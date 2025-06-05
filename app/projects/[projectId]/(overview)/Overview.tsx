@@ -17,8 +17,6 @@ import { PhaseProgressSkeleton } from './components/PhaseProgressSkeleton';
 import { StatsSkeleton } from './components/StatsSkeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import MilestoneChecklist from './components/MilestoneChecklist';
-import { useMilestoneQueries } from '@/hooks/useMilestoneQueries';
-import { IMilestone } from '@/types';
 
 interface Props {
     projectId: string;

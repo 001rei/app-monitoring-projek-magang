@@ -113,10 +113,12 @@ export default function AddTaskForm({
                 ...(taskId && { parent_task_id: taskId }),
             };
 
-            await tasks.details.create(taskData);
-            await reloadProjectTasks();
-            await reloadOverview();
-            await reloadBoard();
+            await Promise.all([
+                tasks.details.create(taskData),
+                reloadProjectTasks(),
+                reloadOverview(),
+                reloadBoard(),
+            ]);
 
             toast({
                 title: 'Success',

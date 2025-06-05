@@ -31,8 +31,9 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
             const supabase = createClient();
             const [isLoading, setIsLoading] = useState(false);
             const [isDialogOpen, setIsDialogOpen] = useState(false);
-            const [isChecked, setIsChecked] = useState(row.original.status?.label === "Done");
             const { can } = useProjectAccess({ projectId });
+            const isChecked = row.original.status?.label === "Done";
+
 
             const task = row.original;
             const { user } = useCurrentUser();
@@ -50,19 +51,22 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
 
                     try {
                         setIsLoading(true);
-
                         updateStatusOnTable(newStatus || 0);
+
                         await supabase
                             .from("tasks")
                             .update({ status: newStatus, updated_at: new Date() })
                             .eq("parent_task_id", task.id);
 
-                        await reloadProjectTasks();
-                        await reloadOverview();
-                        await reloadBoard();
+                        await new Promise((resolve) => setTimeout(resolve, 500));
+
+                        await Promise.all([
+                            reloadProjectTasks(),
+                            reloadOverview(),
+                            reloadBoard()
+                          ]);
 
                         row.toggleSelected(!!value);
-                        setIsChecked(true);
                     } catch (error) {
                         console.error("Gagal mengubah status:", error);
                     } finally {
@@ -71,12 +75,6 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
                 },
                 [updateStatusOnTable, task, row, supabase, reloadProjectTasks]
             );
-
-            const handleCheckboxClick = () => {
-                if (!isChecked) {
-                    setIsDialogOpen(true);
-                }
-            };
 
             const handleConfirm = () => {
                 handleStatusChange(true);
@@ -95,9 +93,10 @@ export const columns: ColumnDef<ITaskWithOptions>[] = [
                                 <TooltipTrigger asChild>
                                     <Checkbox
                                         checked={isChecked}
-                                        onCheckedChange={handleCheckboxClick}
+                                        onCheckedChange={() => {
+                                            if (!isChecked) setIsDialogOpen(true);
+                                        }}
                                         disabled={isLoading || isChecked}
-                                        aria-label="Select row"
                                     />
                                 </TooltipTrigger>
                                 <TooltipContent>

@@ -72,8 +72,9 @@ export const Project = () => {
         }
 
         try {
-            await updatePriority(priorityId || null);
+            updatePriority(priorityId || null);
             updateTaskPriority?.(selectedTask.id, newPriority);
+            await reloadProjectTasks();
 
             const activities: {
                 task_id: string;
@@ -148,6 +149,7 @@ export const Project = () => {
         try {
             updateStatus(statusId || undefined);
             updateTaskStatus?.(selectedTask.id, newStatus);
+            await reloadProjectTasks();
 
             const activities: {
                 task_id: string;
@@ -227,6 +229,7 @@ export const Project = () => {
         try {
             updateDates(updates);
             updateTaskDates?.(selectedTask.id, date);
+            await reloadProjectTasks();
 
         } catch (error) {
             toast({
@@ -401,7 +404,7 @@ export const Project = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger
                         className="text-xs"
-                        disabled={can(ProjectAction.UPDATE_TASKS) || isTaskDone}
+                        disabled={!can(ProjectAction.UPDATE_TASKS) || isTaskDone}
                     >
                         {task?.priority ? (
                             <CustomFieldTagRenderer
@@ -449,7 +452,7 @@ export const Project = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger
                         className="text-xs"
-                        disabled={can(ProjectAction.UPDATE_TASKS) || isTaskDone}
+                        disabled={!can(ProjectAction.UPDATE_TASKS) || isTaskDone}
                     >
                         {task?.status ? (
                             <CustomFieldTagRenderer
@@ -497,7 +500,7 @@ export const Project = () => {
                 <DatePicker
                     date={startDate}
                     onSelect={(date) => !isTaskDone && handleDateChange('startDate', date)}
-                    disabled={can(ProjectAction.UPDATE_TASKS) || isTaskDone}
+                    disabled={!can(ProjectAction.UPDATE_TASKS) || isTaskDone}
                 />
             </div>
 
@@ -506,7 +509,7 @@ export const Project = () => {
                 <DatePicker
                     date={endDate}
                     onSelect={(date) => !isTaskDone && handleDateChange('endDate', date)}
-                    disabled={can(ProjectAction.UPDATE_TASKS) || isTaskDone}
+                    disabled={!can(ProjectAction.UPDATE_TASKS) || isTaskDone}
                 />
             </div>
 
@@ -563,13 +566,13 @@ export const Project = () => {
                                         <DropdownMenuItem
                                             key={attachment.file_path}
                                             className="
-                                    text-xs px-2 py-1.5 rounded flex justify-between items-center
-                                    hover:bg-gray-50 dark:hover:bg-gray-800
-                                    focus:bg-gray-50 dark:focus:bg-gray-800
-                                    active:bg-gray-50 dark:active:bg-gray-800
-                                    data-[highlighted]:bg-gray-50 dark:data-[highlighted]:bg-gray-800
-                                    transition-colors
-                                "
+                                                text-xs px-2 py-1.5 rounded flex justify-between items-center
+                                                hover:bg-gray-50 dark:hover:bg-gray-800
+                                                focus:bg-gray-50 dark:focus:bg-gray-800
+                                                active:bg-gray-50 dark:active:bg-gray-800
+                                                data-[highlighted]:bg-gray-50 dark:data-[highlighted]:bg-gray-800
+                                                transition-colors
+                                            "
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 handleDownloadAttachment(attachment.file_path as string, attachment.file_name as string);

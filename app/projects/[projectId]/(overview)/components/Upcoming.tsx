@@ -31,6 +31,8 @@ export function UpcomingDeadlines({ tasks, projectId }: Props) {
     const currentDate = useMemo(() => new Date(), []);
     const upcomingTasks = useMemo(() => {
         const filteredTasks = tasks.filter((task) => {
+            if (!task.status || !task.endDate) return false;
+
             const endDate = new Date(task.endDate);
             const timeDiff = endDate.getTime() - currentDate.getTime();
             const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
@@ -59,7 +61,7 @@ export function UpcomingDeadlines({ tasks, projectId }: Props) {
                 .in('id', taskIds);
 
             if (error) throw error;
-    
+
         } catch (error) {
             console.error('Error updating tasks status:', error);
         }
@@ -70,14 +72,12 @@ export function UpcomingDeadlines({ tasks, projectId }: Props) {
     useEffect(() => {
         const overdueTaskIds = tasks
             .filter(task => {
-                if (!task.endDate || task.status?.label === 'Done' || task.status?.label === 'Overdue') {
-                    return false;
-                }
+                if (!task.status || !task.endDate) return false;
 
                 const endDate = new Date(task.endDate);
                 const now = new Date();
 
-                return endDate < now;
+                return endDate < now && task.status.label !== 'Done' && task.status.label !== 'Overdue';
             })
             .map(task => task.id);
 
@@ -86,7 +86,7 @@ export function UpcomingDeadlines({ tasks, projectId }: Props) {
         }
 
         return () => debouncedUpdate.cancel();
-    }, [tasks, currentDate]);
+    }, [tasks, currentDate]);   
 
     const maxItems = 3;
     const itemHeight = 96;
@@ -141,9 +141,9 @@ export function UpcomingDeadlines({ tasks, projectId }: Props) {
                                                     </p>
                                                 </Link>
 
-                                                {priority && (
+                                                {priority?.label && (
                                                     <CustomFieldTagRenderer
-                                                        label={priority.label as string}
+                                                        label={priority.label}
                                                         color={priority.color as string}
                                                     />
                                                 )}

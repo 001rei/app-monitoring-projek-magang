@@ -33,7 +33,7 @@ export default function DatePicker({ id, status, category }: Props) {
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [isLoading, setIsLoading] = useState(false);
     const { reloadProjectTasks } = useProjectQueries(projectId as string);
-    const { reloadCurrentMilestones, reloadAllMilestone } = useMilestoneQueries(projectId as string, '');
+    const { reloadAllMilestone } = useMilestoneQueries(projectId as string, '');
     const { reloadAllPhase } = usePhaseQueries(projectId as string, '');
     const { reloadOverview } = useOverviewQueries(projectId as string, id);
     const { reloadBoard } = useBoardQueries(user?.id as string)
