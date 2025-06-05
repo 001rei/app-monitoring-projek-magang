@@ -137,13 +137,14 @@ interface CommentResponse extends Omit<IComment, 'user_id'> {
     }>;
 }
 
-type ActivityType = 'status' | 'priority' | 'date' | 'user' | 'users';
-type ActivityPayload = 'id' | 'value' | 'ids';
+type ActivityType = 'status' | 'priority' | 'date' | 'attachment' | 'user' | 'users';
+type ActivityPayload = 'id' | 'value' | 'ids' | 'filename';
 
 type ActivityObject =
     | { type: 'status'; id: number }
     | { type: 'priority'; id: string }
     | { type: 'date'; value: string }
+    | { type: 'attachment'; value: string }
     | { type: 'user'; id: string }
     | { type: 'users'; ids: string[] };
 

@@ -123,7 +123,7 @@ export const Project = () => {
             }
 
             if (activities.length > 0) {
-                await createActivities(activities);
+                createActivities(activities);
             }
         } catch (error) {
             toast({
@@ -198,7 +198,7 @@ export const Project = () => {
             }
 
             if (activities.length > 0) {
-                await createActivities(activities);
+                createActivities(activities);
             }
         } catch (error) {
             console.error('Error selecting status: ', error);
@@ -240,6 +240,8 @@ export const Project = () => {
     };
 
     const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (!selectedTask?.id) return;
+
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -281,6 +283,28 @@ export const Project = () => {
 
             await tasks.details.uploadAttachment(attachmentData);
             await reloadProjectTasks();
+
+            const activities: {
+                task_id: string;
+                user_id: string;
+                content: TaskActivity;
+            }[] = [];
+
+            activities.push({
+                task_id: selectedTask.id,
+                user_id: user?.id as string,
+                content: [
+                    { type: 'user', id: user?.id as string },
+                    'uploaded attachment',
+                    { type: 'attachment', value: file.name },
+                    'on',
+                    { type: 'date', value: new Date().toISOString() },
+                ],
+            });
+
+            if (activities.length > 0) {
+                createActivities(activities);
+            }
 
             toast({
                 title: 'Success',

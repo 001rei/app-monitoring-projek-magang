@@ -16,6 +16,6 @@ export const secondaryButton = `
 
 export const successButton = `bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-sm h-8`;
 
-export const primaryButton = `bg-blue-500 text-white hover:bg-blue-600`;
+export const primaryButton = 'bg-blue-500 text-white hover:bg-blue-600';
 
 export const deleteButton = `text-red-400 hover:bg-red-100 hover:text-red-700 hover:border hover:border-red-200 dark:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-300 dark:hover:border-red-900`;

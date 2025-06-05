@@ -86,7 +86,7 @@ export const PhotoProfileUploader: React.FC<ProfilePhotoUploaderProps> = ({
                 <>
                     <Button
                         className={cn(
-                            primaryButton,
+                            'bg-blue-500 text-white hover:bg-blue-600',
                             'w-8 h-8 p-2 rounded-full absolute right-[-15px] top-[60%]'
                         )}
                         onClick={() => inputRef.current?.click()}

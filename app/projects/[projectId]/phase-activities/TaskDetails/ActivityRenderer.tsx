@@ -1,4 +1,5 @@
 import { CustomFieldTagRenderer } from '@/components/CustomFieldTagRenderer';
+import FileBadge from '@/components/ui/file-badge';
 import { UserCard } from '@/components/UserCard';
 import { ActivityResponse, IPriority, IStatus, IUser } from '@/types';
 import { FC } from 'react';
@@ -90,6 +91,7 @@ const ActivityRenderer: FC<ActivityRendererProps> = ({
     statuses,
     priorities,
 }) => {
+    console.log(activity)
     return (
         <div className="flex items-center flex-wrap text-xs gap-1 ml-3 my-3">
             {activity.content.map((item, index) => {
@@ -100,7 +102,6 @@ const ActivityRenderer: FC<ActivityRendererProps> = ({
                         </span>
                     );
                 }
-
                 switch (item.type) {
                     case 'user':
                         return (
@@ -127,6 +128,13 @@ const ActivityRenderer: FC<ActivityRendererProps> = ({
                                 status={statuses?.find(
                                     (status: IStatus) => status.id === item.id
                                 )}
+                            />
+                        );
+                    case 'attachment':
+                        return (
+                            <FileBadge
+                                key={index}
+                                filename={item.value}
                             />
                         );
                     case 'priority':
