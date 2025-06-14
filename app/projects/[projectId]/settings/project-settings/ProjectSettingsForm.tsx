@@ -37,10 +37,37 @@ export function ProjectSettingsForm({ project }: { project: IProject }) {
         projectId: project.id,
     });
 
-    if (isLoading) return <div>Loading...</div>;
     if (!can(ProjectAction.VIEW_SETTINGS)) {
         return (
-            <div>You don&apos;t have permission to manage project settings.</div>
+            <Card className="border-destructive/50 bg-destructive/10">
+                <CardHeader className="flex flex-row items-start space-y-0 space-x-4">
+                    <div className="mt-1 bg-destructive/20 p-2 rounded-full">
+                        <AlertCircle className="h-6 w-6 text-destructive" />
+                    </div>
+                    <div>
+                        <CardTitle className="text-lg font-medium">
+                            Access Restricted
+                        </CardTitle>
+                        <CardDescription className="text-destructive/80">
+                            You don't have permission to manage project settings
+                        </CardDescription>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                        Please contact the project owner or an administrator if you believe this is an error.
+                    </p>
+                </CardContent>
+                <CardFooter>
+                    <Button
+                        variant="ghost"
+                        onClick={() => router.push(`/projects/${project.id}`)}
+                        className="text-primary"
+                    >
+                        Back to Projects
+                    </Button>
+                </CardFooter>
+            </Card>
         );
     }
 

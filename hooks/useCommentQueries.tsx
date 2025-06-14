@@ -92,7 +92,6 @@ export const useCommentQueries = (taskId: string) => {
             content: string;
         }) => comments.update(commentId, { content }),
         onSuccess: (updatedComment) => {
-            // Optimistically update the comments list
             queryClient.setQueryData<CommentResponse[]>(
                 ['comments', taskId],
                 (oldComments) => {

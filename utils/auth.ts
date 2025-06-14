@@ -64,7 +64,7 @@ export const auth = {
         } 
 
         return data;
-    },
+    }, 
 
     signInWithOAuth: async (provider: 'github' | 'google',  nextUrl?: string) => {
         const { data, error } = await supabase.auth.signInWithOAuth({

@@ -128,7 +128,7 @@ export default function InviteUsers({
 
     return (
         <div className="py-8">
-            <h1 className="text-lg font-medium">Invite users</h1>
+            <h1 className="text-lg font-medium">Invite Members</h1>
             <p className="text-xs text-muted-foreground pb-2">
                 Send invitations via email
             </p>

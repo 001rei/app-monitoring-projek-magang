@@ -101,8 +101,7 @@ export const comments = {
                     id,
                     name,
                     avatar,
-                    description,
-                    links
+                    description
                     )
                 `
             )

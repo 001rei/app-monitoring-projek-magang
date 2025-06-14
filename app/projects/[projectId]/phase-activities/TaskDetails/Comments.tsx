@@ -36,6 +36,7 @@ interface Props {
 
 export const Comment: FC<Props> = ({ comment }) => {
     const [description, setDescription] = useState(comment.content);
+    console.log(comment.content)
     const [editable, setEditable] = useState(false);
     const { user } = useCurrentUser();
     const { selectedTask } = useTaskDetails();
@@ -55,10 +56,13 @@ export const Comment: FC<Props> = ({ comment }) => {
         if (!description.trim()) return;
 
         try {
-            await updateComment({
-                commentId: comment.id,
-                content: description,
-            });
+            await Promise.all([
+                updateComment({
+                    commentId: comment.id,
+                    content: description,
+                }),
+                reloadCommentTask()
+            ])
 
             setEditable(false);
         } catch (error) {

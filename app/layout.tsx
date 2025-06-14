@@ -7,7 +7,7 @@ import { AppProvider } from './AppProvider';
 import TopLoader from 'nextjs-toploader';
 
 export const metadata: Metadata = {
-  title: "Orchestra.",
+  title: "Orchestra",
   description: "Simple Project Management App",
 };
 
